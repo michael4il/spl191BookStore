@@ -35,12 +35,9 @@ public class InventoryTest {
      */
     @Test
     public void load() {
-        assertTrue(Inv1.isEmpty());
-        Inv1.load(books);
-        //TODO
-        for{
+        //assertTrue(Inv1.isEmpty());
+      //  Inv1.load(books);
 
-        }
     }
 
     /**

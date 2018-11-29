@@ -8,71 +8,22 @@ package bgu.spl.mics.application.passiveObjects;
  * You may add fields and methods to this class as you see fit (including public methods).
  */
 public class OrderReceipt {
+	private int orderID;
+	private String seller;
+	private int customer;
+	private String bookTitle;
+	private int price;
+	private int issueTick;
+	private int orderTick;
+	private int processTick;
 	
-	/**
-     * Retrieves the orderId of this receipt.
-     */
-	public int getOrderId() {
-		// TODO Implement this
-		return 0;
-	}
-	
-	/**
-     * Retrieves the name of the selling service which handled the order.
-     */
-	public String getSeller() {
-		// TODO Implement this
-		return null;
-	}
-	
-	/**
-     * Retrieves the ID of the customer to which this receipt is issued to.
-     * <p>
-     * @return the ID of the customer
-     */
-	public int getCustomerId() {
-		// TODO Implement this
-		return 0;
-	}
-	
-	/**
-     * Retrieves the name of the book which was bought.
-     */
-	public String getBookTitle() {
-		// TODO Implement this
-		return null;
-	}
-	
-	/**
-     * Retrieves the price the customer paid for the book.
-     */
-	public int getPrice() {
-		// TODO Implement this
-		return 0;
-	}
-	
-	/**
-     * Retrieves the tick in which this receipt was issued.
-     */
-	public int getIssuedTick() {
-		// TODO Implement this
-		return 0;
-	}
-	
-	/**
-     * Retrieves the tick in which the customer sent the purchase request.
-     */
-	public int getOrderTick() {
-		// TODO Implement this
-		return 0;
-	}
-	
-	/**
-     * Retrieves the tick in which the treating selling service started 
-     * processing the order.
-     */
-	public int getProcessTick() {
-		// TODO Implement this
-		return 0;
-	}
+
+	public int getOrderId() { return orderID; }//***************************GETS****************************
+	public String getSeller() { return seller; }
+	public int getCustomerId() { return customer; }
+	public String getBookTitle() { return bookTitle; }
+	public int getPrice() { return price; }
+	public int getIssuedTick() { return issueTick; }
+	public int getOrderTick() { return orderTick; }
+	public int getProcessTick() { return processTick; }
 }

@@ -7,7 +7,8 @@ package bgu.spl.mics;
  */
 public class MessageBusImpl implements MessageBus {
 	public static MessageBusImpl getInstance(){
-//
+
+		return null;
 	}
 
 	@Override
