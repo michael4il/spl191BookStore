@@ -10,17 +10,23 @@ public class FutureTest {
 
     @Before
     public void setUp() throws Exception {
-        assertEquals(1,2);//jjjjj
     }
 
     @After
     public void tearDown() throws Exception {
     }
 
+    /**
+     * none.
+     */
     @Test
     public void get() {
     }
 
+    /**
+     * @param T
+     * @post @post(get) == @pre(
+     */
     @Test
     public void resolve() {
     }
