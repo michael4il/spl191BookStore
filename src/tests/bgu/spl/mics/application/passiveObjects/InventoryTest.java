@@ -21,10 +21,9 @@ public class InventoryTest {
         return new Inventory();
     }
 
-    @After
-    public void tearDown() throws Exception {
-    }
-
+    /**
+     * We don't need tearDown function here.
+     */
     /*none*/
     @Test
     public void getInstance() {
@@ -56,10 +55,11 @@ public class InventoryTest {
 
     /**
      * @pre none. Because if the inventory is empty then the should work and returns -1.
-     * @post none.
+     * @post @pre(books) == @post(books).
      */
     @Test
     public void checkAvailabiltyAndGetPrice() {
+        //TODO
     }
 
     @Test
