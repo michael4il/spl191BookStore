@@ -10,6 +10,7 @@ public class FutureTest {
 
     @Before
     public void setUp() throws Exception {
+        assertEquals(1,2);
     }
 
     @After
