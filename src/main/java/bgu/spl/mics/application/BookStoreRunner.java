@@ -6,6 +6,8 @@ package bgu.spl.mics.application;
  */
 public class BookStoreRunner {
     public static void main(String[] args) {
-    System.out.println("aaa");
+
+
+
     }
 }
