@@ -72,4 +72,8 @@ public class Inventory {
 	public void printInventoryToFile(String filename){
 		//TODO: Implement this
 	}
+	public int length () {return 0;}
+	public String getBookTitle (int i){return null;}
+	public int getPrice(int i){return 0;}
+	public int getAmountInInventory(int i){return 0;}
 }

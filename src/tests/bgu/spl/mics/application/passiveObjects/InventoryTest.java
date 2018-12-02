@@ -7,14 +7,14 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class InventoryTest {
-    Inventory Inv1;
-    BookInventoryInfo[] currbooks;
+    private Inventory Inv1;
+    private BookInventoryInfo[] currbooks;
 
     @Before
     public void setUp() throws Exception {
         Inv1 = createInventory();
         for(int i=0;i<5;i++){
-            currbooks[i] = new BookInventoryInfo("book " + i, i+1, i+70);
+            currbooks[i] = new BookInventoryInfo("book " + i, 2, i+70);
         }
     }
     protected Inventory createInventory(){
@@ -38,12 +38,13 @@ public class InventoryTest {
      */
     @Test
     public void load() {
-        assertTrue(Inv1.getInstance()!=null);
-        if(Inv1.getInstance().inventory.length != currbooks.length) {
+        assertTrue(Inv1!=null);
+        if(Inv1.length() != currbooks.length) {
             fail("Arrays are not the same. ");
         }
-        for(int i = 0; i<Inv1.getInstance().inventory.length;i++){
-            if(Inv1.getInstance().inventory.getBookTitle() != currbooks[i].getBookTitle() || Inv1.getInstance().inventory.getAmountInInventory() != currbooks[i].getAmountInInventory() || Inv1.getInstance().inventory.getPrice() != currbooks[i].getPrice()){
+        for(int i = 0; i<Inv1.length();i++){
+            if(Inv1.getBookTitle(i).equals(currbooks[i].getBookTitle())  || Inv1.getAmountInInventory(i) != currbooks[i].getAmountInInventory() ||
+                    Inv1.getPrice(i) != currbooks[i].getPrice()){
                 fail("Some elements are not the same. ");
             }
         }
@@ -57,13 +58,13 @@ public class InventoryTest {
      */
     @Test
     public void take() {
-        assertTrue(Inv1.getInstance()!=null);
+        assertNotNull(Inv1);
         OrderResult result = Inv1.take("book 1"); //Should return SUCCESSFULLY_TAKEN.
         if(result!= OrderResult.SUCCESSFULLY_TAKEN){
             fail("Take didn't find something that exist. ");
         }
         //we will check the the amount decrease by 1. it was 2.
-        if(Inv1.getInstance().inventory[1].getAmountInInventory() != 1){
+        if(Inv1.getAmountInInventory(0) != 1){
             fail("Take didn't change the amount. ");
         }
         result = Inv1.take("HarryBarry 1"); //Should return NOT_IN_STOCK.
@@ -71,8 +72,8 @@ public class InventoryTest {
             fail("Take find something that doesn't exist. ");
         }
         //we will check that the amount didn't decrease. it was 2.
-        if(Inv1.getInstance().inventory[1].getAmountInInventory() != 2){
-            fail("Take change the amount and it was not suppose. ");
+        if(Inv1.getAmountInInventory(1) != 2){
+            fail("Take change the amount of a different book. ");
         }
     }
 
