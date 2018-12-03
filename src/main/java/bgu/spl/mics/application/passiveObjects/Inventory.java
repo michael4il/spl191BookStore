@@ -81,6 +81,5 @@ public class Inventory {
 	public void setBooks(BookInventoryInfo[] books) {
 		this.books = books;
 	}
-
 	private BookInventoryInfo[] books;
 }
