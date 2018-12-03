@@ -20,8 +20,8 @@ public class Customer {
 
 
 	public Customer (int id,String name,String address,int Distance ,int ccard,int csum){
-		this.id=id;
-		this.name=name;
+		this.id = id;
+		this.name = name;
 		this.address=address;
 		this.Distance=Distance;
 		creditCard=ccard;

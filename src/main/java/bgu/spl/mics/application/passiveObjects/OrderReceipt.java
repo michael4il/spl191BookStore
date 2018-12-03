@@ -16,9 +16,9 @@ public class OrderReceipt {
 	private int issueTick;
 	private int orderTick;
 	private int processTick;
-	
 
-	public int getOrderId() { return orderID; }//***************************GETS****************************
+	//***************************GETS****************************
+	public int getOrderId() { return orderID; }
 	public String getSeller() { return seller; }
 	public int getCustomerId() { return customer; }
 	public String getBookTitle() { return bookTitle; }

@@ -72,8 +72,15 @@ public class Inventory {
 	public void printInventoryToFile(String filename){
 		//TODO: Implement this
 	}
-	public int length () {return 0;}
-	public String getBookTitle (int i){return null;}
-	public int getPrice(int i){return 0;}
-	public int getAmountInInventory(int i){return 0;}
+	//for the test
+
+	public BookInventoryInfo[] getBooks() {
+		return books;
+	}
+
+	public void setBooks(BookInventoryInfo[] books) {
+		this.books = books;
+	}
+
+	private BookInventoryInfo[] books;
 }
