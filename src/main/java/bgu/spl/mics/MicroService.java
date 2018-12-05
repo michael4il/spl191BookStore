@@ -93,7 +93,9 @@ public abstract class MicroService implements Runnable {
      * 	       			null in case no micro-service has subscribed to {@code e.getClass()}.
      */
     protected final <T> Future<T> sendEvent(Event<T> e) {
-        //TODO: implement this.
+        //TODO
+        Future<T> futureObj;
+        MessageBusImpl.getInstance().sendEvent(e);
         return null; //TODO: delete this line :)
     }
 

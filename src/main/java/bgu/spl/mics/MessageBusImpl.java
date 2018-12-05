@@ -1,19 +1,26 @@
 package bgu.spl.mics;
 
+import java.util.LinkedList;
+
 /**
  * The {@link MessageBusImpl class is the implementation of the MessageBus interface.
  * Write your implementation here!
  * Only private fields and methods can be added to this class.
  */
 public class MessageBusImpl implements MessageBus {
+	private static class SingletonHolder{
+		private static MessageBusImpl instance = new MessageBusImpl();
+	}
+	private MessageBusImpl(){
+		//Init
+	}
 	public static MessageBusImpl getInstance(){
-
-		return null;
+		return SingletonHolder.instance;
+		//Why exist return null;?
 	}
 
 	@Override
 	public <T> void subscribeEvent(Class<? extends Event<T>> type, MicroService m) {
-		// TODO Auto-generated method stub
 
 	}
 
@@ -44,7 +51,6 @@ public class MessageBusImpl implements MessageBus {
 
 	@Override
 	public void register(MicroService m) {
-		// TODO Auto-generated method stub
 
 	}
 
@@ -60,6 +66,5 @@ public class MessageBusImpl implements MessageBus {
 		return null;
 	}
 
-	
 
 }

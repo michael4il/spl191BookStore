@@ -10,9 +10,6 @@ package bgu.spl.mics;
  * You cannot add methods to this interface.
  */
 public interface MessageBus {
-    //TODO
-    private static class SingeltonHolder;
-    public static MessageBusImpl getInstance();
     /**
      * Subscribes {@code m} to receive {@link Event}s of type {@code type}.
      * <p>
