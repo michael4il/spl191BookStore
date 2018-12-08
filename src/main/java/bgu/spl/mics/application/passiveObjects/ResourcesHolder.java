@@ -12,13 +12,15 @@ import bgu.spl.mics.Future;
  * You can add ONLY private methods and fields to this class.
  */
 public class ResourcesHolder {
+	private static class SingletonHolder{
+		private static ResourcesHolder instance = new ResourcesHolder();
+	}
 	
 	/**
      * Retrieves the single instance of this class.
      */
 	public static ResourcesHolder getInstance() {
-		//TODO: Implement this
-		return null;
+		return SingletonHolder.instance;
 	}
 	
 	/**

@@ -13,14 +13,15 @@ package bgu.spl.mics.application.passiveObjects;
  * You can add ONLY private fields and methods to this class as you see fit.
  */
 public class Inventory {
-
-
+	private static class SingletonHolder{
+		private static Inventory instance = new Inventory();
+	}
 	/**
      * Retrieves the single instance of this class.
      */
 	public static Inventory getInstance() {
-		//TODO: Implement this
-		return null;
+
+		return SingletonHolder.instance;
 	}
 	
 	/**

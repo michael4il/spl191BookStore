@@ -12,13 +12,16 @@ package bgu.spl.mics.application.passiveObjects;
  * You can add ONLY private fields and methods to this class as you see fit.
  */
 public class MoneyRegister {
+	private  static class SingletonHolder{
+		private static MoneyRegister instance = new MoneyRegister();
+	}
 	
 	/**
      * Retrieves the single instance of this class.
      */
 	public static MoneyRegister getInstance() {
-		//TODO: Implement this
-		return null;
+
+		return SingletonHolder.instance;
 	}
 	
 	/**
