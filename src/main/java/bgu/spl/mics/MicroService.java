@@ -144,7 +144,7 @@ public abstract class MicroService implements Runnable {
      *         construction time and is used mainly for debugging purposes.
      */
     public final String getName() {
-        return name;
+        return name+" "+Thread.currentThread().toString();
     }
 
     /**

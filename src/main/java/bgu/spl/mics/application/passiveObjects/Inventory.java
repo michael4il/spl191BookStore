@@ -2,6 +2,7 @@ package bgu.spl.mics.application.passiveObjects;
 
 
 
+
 /**
  * Passive data-object representing the store inventory.
  * It holds a collection of {@link BookInventoryInfo} for all the
