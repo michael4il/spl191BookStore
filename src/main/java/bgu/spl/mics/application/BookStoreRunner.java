@@ -4,8 +4,11 @@ import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.Json.Input;
 import bgu.spl.mics.application.services.TimeService;
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import  java.util.Map;
+
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -23,7 +26,15 @@ public class BookStoreRunner {//testing
         { jsoninput=parser.parse(fileReader).getAsJsonObject();}
         catch (IOException e ) {throw e;}
         System.out.println(jsoninput.size());//inventory,resources,services(including customer)
-       // gson.fromJson(jsoninput);
+        Map<String, String> map = new Gson().fromJson(jsoninput.toString(),Map.class);
+     //   JsonObject Inventory = jsoninput.getAsJsonObject("initialInventory");
+        System.out.println(map.keySet());
+     //   Map<String, String> mapI = new Gson().fromJson(Inventory.toString(),Map.class);
+       // System.out.println(mapI);
+
+// need to use Json element?
+
+
 
 
 
