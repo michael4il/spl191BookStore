@@ -2,7 +2,6 @@ package bgu.spl.mics;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * A Future object represents a promised result - an object that will
@@ -14,13 +13,13 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class Future<T> {
 	private T result;
-	private AtomicBoolean isDone;
-	private Object lockResolve;
+	private AtomicBoolean isDone = new AtomicBoolean(false);
+	private final Object lockResolve = new Object();
 	/**
 	 * This should be the the only public constructor in this class.
 	 */
 	public Future() {
-		//TODO: implement this
+		isDone.set(false);
 	}
 
 	/**
@@ -45,9 +44,11 @@ public class Future<T> {
 	 */
 	public void resolve (T result) {
 		synchronized (lockResolve) {
-			if (isDone.get())
+			if (!isDone.get()) {
 				this.result = result;
-			isDone.set(true);
+				isDone.set(true);
+				notifyAll();
+			}
 		}
 	}
 
@@ -55,8 +56,7 @@ public class Future<T> {
 	 * @return true if this object has been resolved, false otherwise
 	 */
 	public boolean isDone() {
-		//TODO: implement this.
-		return false;
+		return isDone.get();
 	}
 
 	/**
@@ -64,15 +64,26 @@ public class Future<T> {
 	 * This method is non-blocking, it has a limited amount of time determined
 	 * by {@code timeout}
 	 * <p>
-	 * @param timout 	the maximal amount of time units to wait for the result.
+	 * @param timeout 	the maximal amount of time units to wait for the result.
 	 * @param unit		the {@link TimeUnit} time units to wait.
 	 * @return return the result of type T if it is available, if not,
 	 * 	       wait for {@code timeout} TimeUnits {@code unit}. If time has
 	 *         elapsed, return null.
 	 */
+	//SYNC???
 	public T get(long timeout, TimeUnit unit) {
-		//TODO: implement this.
-		return null;
+		if(!isDone.get()){
+			try {
+				wait(TimeUnit.MILLISECONDS.convert(timeout,unit));
+				if(!isDone.get()) {
+					return null;
+				}
+				else {
+					return result;
+				}
+			}catch (InterruptedException interE) {return null;}
+		}
+		return result;
 	}
 
 }

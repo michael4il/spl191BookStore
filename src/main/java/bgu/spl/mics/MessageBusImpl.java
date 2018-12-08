@@ -2,7 +2,6 @@ package bgu.spl.mics;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * The {@link MessageBusImpl class is the implementation of the MessageBus interface.
@@ -20,59 +19,71 @@ public class MessageBusImpl implements MessageBus {
 		return SingletonHolder.instance;
 		//Why exist return null;?
 	}
-	//Hash that holds the microServices and their event queue
-	private ConcurrentHashMap<MicroService ,ConcurrentLinkedQueue<Event>> concHashMicroService = new ConcurrentHashMap<>();//Keys are the name of the service. Values are MicroServices.
-	//Hash that holds for each Event type a queue of microServices that can handel with it, it means get it.
-	private ConcurrentHashMap<Class<? extends Event> ,ConcurrentLinkedQueue<MicroService>> concHashEvent = new ConcurrentHashMap<>();
-	//Hash that holds for each Broadcast type list of MicroServices that are willing to get it.
-	private ConcurrentHashMap<Class<? extends Broadcast> ,ConcurrentLinkedQueue<MicroService>> concHashBroadcast = new ConcurrentHashMap<>();
-	//private AtomicReference<Class<? extends Event>> refQueueEvents = new AtomicReference<>(null);
 
+	private ConcurrentHashMap<MicroService ,ConcurrentLinkedQueue<Event>> microServiceToQueue = new ConcurrentHashMap<>();//Hash that holds the microServices and their event queue
+	private ConcurrentHashMap<Class<? extends Event> ,ConcurrentLinkedQueue<MicroService>> eventToQueue = new ConcurrentHashMap<>(); 	//Hash that holds for each Event type a queue of microServices that can handel with it, it means get it.
+	private ConcurrentHashMap<Class<? extends Broadcast> ,ConcurrentLinkedQueue<MicroService>> broadcastToQueue = new ConcurrentHashMap<>();	//Hash that holds for each Broadcast type list of MicroServices that are willing to get it.
+
+	private ConcurrentHashMap<Event, Future> eventToFuture = new ConcurrentHashMap<>();
+	private ConcurrentHashMap<MicroService, ConcurrentLinkedQueue<Message>> serviceToMessageQueue = new ConcurrentHashMap<>();
+
+	//private AtomicReference<Class<? extends Event>> refQueueEvents = new AtomicReference<>(null);
 	@Override
 	//Should be synch
 	public <T> void subscribeEvent(Class<? extends Event<T>> type, MicroService m) {
-		if(concHashEvent.get(type) == null){ //if the type of this event is not already handle.
-			concHashEvent.put(type ,new ConcurrentLinkedQueue<>());
+		if(eventToQueue.get(type) == null){ //if the type of this event is not already handle.
+			eventToQueue.put(type ,new ConcurrentLinkedQueue<>());
 		}
-		concHashEvent.get(type).add(m);
+		eventToQueue.get(type).add(m);
 	}
 
 	@Override
 	//Should be synch
 	public void subscribeBroadcast(Class<? extends Broadcast> type, MicroService m) {
-		if(concHashBroadcast.get(type) == null){ //if the type of this Broadcast is not already handle.
-			concHashBroadcast.put(type, new ConcurrentLinkedQueue<>());
+		if(broadcastToQueue.get(type) == null){ //if the type of this Broadcast is not already handle.
+			broadcastToQueue.put(type, new ConcurrentLinkedQueue<>());
 		}
-		concHashBroadcast.get(type).add(m);
+		broadcastToQueue.get(type).add(m);
 	}
 
 	@Override
 	public <T> void complete(Event<T> e, T result) {
-
+		eventToFuture.get(e).resolve(result);
 	}
 
 	@Override
 	public void sendBroadcast(Broadcast b) {
-		// TODO Auto-generated method stub
-
+		for(int i = 0 ; i < broadcastToQueue.get(b).size(); i++) {
+			if(serviceToMessageQueue.get(broadcastToQueue.get(b).peek()) == null){
+				serviceToMessageQueue.put(broadcastToQueue.get(b).peek(), new ConcurrentLinkedQueue<>());
+			}
+			serviceToMessageQueue.get(broadcastToQueue.get(b).poll()).add(b);
+		}
 	}
 
 	@Override
 	public <T> Future<T> sendEvent(Event<T> e) {
-
-		return null;
+		if(eventToQueue.get(e) == null){
+			return null;
+		}
+		Future<T> futureObj = new Future<>();
+		eventToFuture.put(e, futureObj);
+		MicroService m = eventToQueue.get(e).poll();
+		eventToQueue.get(e).add(m);
+		microServiceToQueue.get(m).add(e);
+		return futureObj;
 	}
 
 	@Override
 	public void register(MicroService m) {
 		ConcurrentLinkedQueue concQ = new ConcurrentLinkedQueue();
-		concHashMicroService.put(m ,concQ);
+		microServiceToQueue.put(m ,concQ);
 	}
 
 	@Override
 	public void unregister(MicroService m) {
 		ConcurrentLinkedQueue tempQ;
-		tempQ = concHashMicroService.get(m);//Does we get here a specific key or we have many keys that is the same as the class of the instance of the MS m?
+		tempQ = microServiceToQueue.get(m);//Does we get here a specific key or we have many keys that is the same as the class of the instance of the MS m?
 		if(tempQ == null){
 			return;
 		}
