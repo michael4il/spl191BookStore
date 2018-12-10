@@ -75,8 +75,7 @@ public class MessageBusImpl implements MessageBus {
 
 	@Override
 	public <T> Future<T> sendEvent(Event<T> e) {
-		synchronized (e.getClass()) { //Maybe should change to toString. Maybe don't need it.
-			synchronized (blockAddEvent) {
+		//synchronized (blockAddEvent){   //I want it to be sync on eventToQueue.get(e.getClass())) { //Maybe should change to toString. Maybe don't need it.
 				if (eventToQueue.get(e.getClass()) == null) {
 					return null;
 				}
@@ -87,8 +86,7 @@ public class MessageBusImpl implements MessageBus {
 				microServiceToMessageQueue.get(m).add(e);
 				notifyAll();
 				return futureObj;
-			}
-		}
+		//}
 	}
 
 	@Override
@@ -114,20 +112,27 @@ public class MessageBusImpl implements MessageBus {
 					e = (Event) tempQ.poll();
 				}
 				//if some queue that contains micro services that can handle with some event type is empty we should delete it from the map.
+
 			}
 		}
 	}
+
 	@Override
 	public Message awaitMessage(MicroService m) throws InterruptedException {
+		System.out.println("Enter awaitMessage");
 		synchronized (blockAddBroadcast) {
-			synchronized (blockAddEvent) {
-				while (microServiceToMessageQueue.get(m).peek() == null) {
-					wait();
+			System.out.println("awaitMessage: aquire blockAddBraodcast");
+			//synchronized (blockAddEvent) {
+				synchronized (m) {
+					//System.out.println("awaitMessage: aquire blockAddEvent");
+					while (microServiceToMessageQueue.get(m).peek() == null) {
+						m.wait();
+						System.out.println("Already waited");
+					}
 				}
-			}
+			//}
 		}
 		return microServiceToMessageQueue.get(m).poll();
 	}
-
 
 }
