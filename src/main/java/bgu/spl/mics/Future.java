@@ -6,7 +6,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * A Future object represents a promised result - an object that will
  * eventually be resolved to hold a result of some operation. The class allows
- * Retrieving the result once it is available.
+ * Retrieving the result once it is available
+ *
  *
  * Only private methods may be added to this class.
  * No public constructor is allowed except for the empty constructor.
@@ -14,7 +15,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class Future<T> {
 	private T result;
 	private AtomicBoolean isDone = new AtomicBoolean(false);
-	private final Object lockResolve = new Object();
 	/**
 	 * This should be the the only public constructor in this class.
 	 */
@@ -43,12 +43,10 @@ public class Future<T> {
 	 * Resolves the result of this Future object.
 	 */
 	public synchronized void resolve (T result) {
-		synchronized (lockResolve) {
-			if (!isDone.get()) {
-				this.result = result;
-				isDone.set(true);
-				notifyAll();
-			}
+		if (!isDone.get()) {
+			this.result = result;
+			isDone.set(true);
+			notifyAll();
 		}
 	}
 
@@ -70,8 +68,7 @@ public class Future<T> {
 	 * 	       wait for {@code timeout} TimeUnits {@code unit}. If time has
 	 *         elapsed, return null.
 	 */
-	//SYNC???
-	public T get(long timeout, TimeUnit unit) {
+	public synchronized T get(long timeout, TimeUnit unit) {
 		if(!isDone.get()){
 			try {
 				wait(TimeUnit.MILLISECONDS.convert(timeout,unit));

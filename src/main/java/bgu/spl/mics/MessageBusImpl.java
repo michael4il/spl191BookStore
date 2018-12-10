@@ -9,29 +9,29 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * Only private fields and methods can be added to this class.
  */
 public class MessageBusImpl implements MessageBus {
-	private static class SingletonHolder{
-		private static MessageBusImpl instance = new MessageBusImpl();
-	}
-	private MessageBusImpl(){
-		//Init
-	}
-	public static MessageBusImpl getInstance(){
-		return SingletonHolder.instance;
-		//Why exist return null;?
-	}
 
 	private ConcurrentHashMap<MicroService ,ConcurrentLinkedQueue<Message>> serviceToQueue = new ConcurrentHashMap<>();//Hash that holds the microServices and their event queue
 	private ConcurrentHashMap<Class<? extends Event> ,ConcurrentLinkedQueue<MicroService>> eventToQueue = new ConcurrentHashMap<>(); 	//Hash that holds for each Event type a queue of microServices that can handel with it, it means get it.
 	private ConcurrentHashMap<Class<? extends Broadcast> ,ConcurrentLinkedQueue<MicroService>> broadcastToQueue = new ConcurrentHashMap<>();	//Hash that holds for each Broadcast type list of MicroServices that are willing to get it.
-
 	private ConcurrentHashMap<Event, Future> eventToFuture = new ConcurrentHashMap<>();
+
+	private static class SingletonHolder{
+		private static MessageBusImpl instance = new MessageBusImpl();
+	}
+
+	private MessageBusImpl(){
+		//Init
+	}
+
+	public static MessageBusImpl getInstance(){
+		return SingletonHolder.instance;
+	}
+
 
 	//private AtomicReference<Class<? extends Event>> refQueueEvents = new AtomicReference<>(null);
 	@Override
 	//Should be synch
 	public <T> void subscribeEvent(Class<? extends Event<T>> type, MicroService m) {
-
-
 		if(eventToQueue.get(type) == null){ //if the type of this event is not already handle.
 			eventToQueue.put(type ,new ConcurrentLinkedQueue<>());
 
@@ -42,7 +42,6 @@ public class MessageBusImpl implements MessageBus {
 	@Override
 	//Should be synch
 	public void subscribeBroadcast(Class<? extends Broadcast> type, MicroService m) {
-
 		if(broadcastToQueue.get(type) == null){ //if the type of this Broadcast is not already handle.
 			broadcastToQueue.put(type, new ConcurrentLinkedQueue<>());
 		}
@@ -55,38 +54,39 @@ public class MessageBusImpl implements MessageBus {
 	}
 
 	@Override
-	public synchronized void  sendBroadcast(Broadcast b) {
+	public void  sendBroadcast(Broadcast b) {
 //		for(int i = 0 ; i < broadcastToQueue.get(b.getClass()).size(); i++) {
 //			if(serviceToQueue.get(broadcastToQueue.get(b.getClass()).peek()) == null){
 //				serviceToQueue.put(broadcastToQueue.get(b.getClass()).peek(), new ConcurrentLinkedQueue<>());
 //			}
 //			serviceToQueue.get(broadcastToQueue.get(b.getClass()).poll()).add(b);
 //		}
-
 		for(MicroService q: broadcastToQueue.get(b.getClass())) {
-			serviceToQueue.get(q).add(b);
+			synchronized (serviceToQueue.get(q)) {
+				serviceToQueue.get(q).add(b);
+				serviceToQueue.get(q).notify();
+			}
 		}
-		notifyAll();
-
-
 	}
 
 	@Override
-	public synchronized <T> Future<T> sendEvent(Event<T> e) {
-
+	public <T> Future<T> sendEvent(Event<T> e) {
 		if(eventToQueue.get(e.getClass()) == null){
 			return null;
 		}
 		Future<T> futureObj = new Future<>();
 		eventToFuture.put(e, futureObj);
-		MicroService m = eventToQueue.get(e.getClass()).poll();
-		eventToQueue.get(e.getClass()).add(m);
-		serviceToQueue.get(m).add(e);
-		notifyAll();
+		MicroService m;
+		//We should check here the round robbin.
+		eventToQueue.get(e.getClass()).add(m = eventToQueue.get(e.getClass()).poll());
+		synchronized (serviceToQueue.get(m)) {
+			serviceToQueue.get(m).add(e);
+			serviceToQueue.get(m).notifyAll();
+		}
 		return futureObj;
-
 	}
 
+	//Maybe the new make it not able to reach.
 	@Override
 	public void register(MicroService m) {
 		ConcurrentLinkedQueue concQ = new ConcurrentLinkedQueue();
@@ -100,23 +100,21 @@ public class MessageBusImpl implements MessageBus {
 		if(tempQ == null){
 			return;
 		}
-		Event e;
-		while(!tempQ.isEmpty()){
-			e = (Event)tempQ.poll();
-
+		synchronized (serviceToQueue.get(m)) {
+			while (!tempQ.isEmpty()) {
+				tempQ.remove();
+			}
 		}
 	}
 
-
-
 	@Override
-	public synchronized Message awaitMessage(MicroService m) {
-		try{
-			while(serviceToQueue.get(m).isEmpty())
-				wait();}
-		catch (InterruptedException e){}
-
-		return serviceToQueue.get(m).poll();
+	public Message awaitMessage(MicroService m) throws InterruptedException {
+		synchronized (serviceToQueue.get(m)) {
+			while (serviceToQueue.get(m).isEmpty()) {
+				serviceToQueue.get(m).wait();
+			}
+			return serviceToQueue.get(m).poll();
+		}
 	}
 
 }

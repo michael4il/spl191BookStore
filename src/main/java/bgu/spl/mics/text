@@ -1,0 +1,16 @@
+start sender sender1 event
+start brod-listener brod1 3
+start brod-listener brod2 3
+start brod-listener brod3 3
+
+start ev-handler hand1 5
+start ev-handler hand2 5
+start ev-handler hand3 5
+start ev-handler hand5 5
+
+start sender sender2 broadcast
+start sender sender2 event
+start sender sender3 event
+start sender sender4 broadcast
+start sender sender5 event
+quit
