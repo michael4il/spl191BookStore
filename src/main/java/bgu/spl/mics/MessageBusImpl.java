@@ -108,11 +108,13 @@ public class MessageBusImpl implements MessageBus {
 				qu.remove(m);
 			}
 		}));
-		synchronized (serviceToQueue.get(m)) {
-			while (!tempQ.isEmpty()) {
-				tempQ.remove();
+		broadcastToQueue.forEach((ev,qu) -> qu.forEach(ms-> {
+			if(ms == m){
+				qu.remove(m);
 			}
-		}
+		}));
+		//Should be sync on serviceToQueue.get(m)? does not make sense because how we will free the key of something that is not exist?
+		serviceToQueue.remove(m);
 	}
 
 	@Override

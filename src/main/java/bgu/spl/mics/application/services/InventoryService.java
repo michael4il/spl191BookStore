@@ -18,7 +18,6 @@ public class InventoryService extends MicroService{
 
 	public InventoryService() {
 		super("");
-		// TODO Implement this
 	}
 
 	@Override

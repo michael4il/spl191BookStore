@@ -1,7 +1,7 @@
 package bgu.spl.mics.application.passiveObjects;
 
 
-
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Passive data-object representing the store inventory.
@@ -14,6 +14,8 @@ package bgu.spl.mics.application.passiveObjects;
  * You can add ONLY private fields and methods to this class as you see fit.
  */
 public class Inventory {
+	private ConcurrentHashMap<String, Integer> bookNametoPrice = new ConcurrentHashMap<>();
+	private ConcurrentHashMap<String, Integer> bookNametoAmount = new ConcurrentHashMap<>();
 	private static class SingletonHolder{
 		private static Inventory instance = new Inventory();
 	}
@@ -21,7 +23,6 @@ public class Inventory {
      * Retrieves the single instance of this class.
      */
 	public static Inventory getInstance() {
-
 		return SingletonHolder.instance;
 	}
 	
@@ -32,6 +33,7 @@ public class Inventory {
      * @param inventory 	Data structure containing all data necessary for initialization
      * 						of the inventory.
      */
+	//Not sync
 	public void load (BookInventoryInfo[ ] inventory ) {
 		
 	}
@@ -44,6 +46,7 @@ public class Inventory {
      * 			The first should not change the state of the inventory while the 
      * 			second should reduce by one the number of books of the desired type.
      */
+	//Maybe sync on the book
 	public OrderResult take (String book) {
 		
 		return null;
@@ -57,6 +60,8 @@ public class Inventory {
      * @param book 		Name of the book.
      * @return the price of the book if it is available, -1 otherwise.
      */
+	// sync if the output depends on the 'take' method.
+	//Probably YES!
 	public int checkAvailabiltyAndGetPrice(String book) {
 		//TODO: Implement this
 		return -1;
@@ -74,14 +79,4 @@ public class Inventory {
 	public void printInventoryToFile(String filename){
 		//TODO: Implement this
 	}
-	//for the test
-
-	public BookInventoryInfo[] getBooks() {
-		return books;
-	}
-
-	public void setBooks(BookInventoryInfo[] books) {
-		this.books = books;
-	}
-	private BookInventoryInfo[] books;
 }
