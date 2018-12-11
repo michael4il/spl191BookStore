@@ -24,10 +24,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public abstract class MicroService implements Runnable {
     private MessageBusImpl Bus = MessageBusImpl.getInstance();
     private ConcurrentHashMap<Class<? extends Message> ,Callback> messageToCall = new ConcurrentHashMap<>();
-
-
-
-
     private boolean terminated = false;
     private final String name;
 
@@ -104,7 +100,7 @@ public abstract class MicroService implements Runnable {
      * 	       			null in case no micro-service has subscribed to {@code e.getClass()}.
      */
     protected final <T> Future<T> sendEvent(Event<T> e) {
-        return Bus.sendEvent(e);
+        return MessageBusImpl.getInstance().sendEvent(e);
     }
 
     /**

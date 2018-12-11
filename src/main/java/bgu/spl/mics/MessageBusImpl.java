@@ -28,23 +28,24 @@ public class MessageBusImpl implements MessageBus {
 		return SingletonHolder.instance;
 	}
 
-
-	//private AtomicReference<Class<? extends Event>> refQueueEvents = new AtomicReference<>(null);
+	@SuppressWarnings("Duplicates")
 	@Override
-	//Should be synch
 	public <T> void subscribeEvent(Class<? extends Event<T>> type, MicroService m) {
-		if(eventToQueue.get(type) == null){ //if the type of this event is not already handle.
-			eventToQueue.put(type ,new ConcurrentLinkedQueue<>());
-
+		synchronized (type.getName()) {
+			if (eventToQueue.get(type) == null) {//if the type of this event is not already handle.
+				eventToQueue.put(type, new ConcurrentLinkedQueue<>());
+			}
 		}
 		eventToQueue.get(type).add(m);
 	}
 
+	@SuppressWarnings("Duplicates")
 	@Override
-	//Should be synch
 	public void subscribeBroadcast(Class<? extends Broadcast> type, MicroService m) {
-		if(broadcastToQueue.get(type) == null){ //if the type of this Broadcast is not already handle.
-			broadcastToQueue.put(type, new ConcurrentLinkedQueue<>());
+		synchronized (type.getName()) {
+			if (broadcastToQueue.get(type) == null) { //if the type of this Broadcast is not already handle.
+				broadcastToQueue.put(type, new ConcurrentLinkedQueue<>());
+			}
 		}
 		broadcastToQueue.get(type).add(m);
 	}
@@ -56,30 +57,30 @@ public class MessageBusImpl implements MessageBus {
 
 	@Override
 	public void  sendBroadcast(Broadcast b) {
-//		for(int i = 0 ; i < broadcastToQueue.get(b.getClass()).size(); i++) {
-//			if(serviceToQueue.get(broadcastToQueue.get(b.getClass()).peek()) == null){
-//				serviceToQueue.put(broadcastToQueue.get(b.getClass()).peek(), new ConcurrentLinkedQueue<>());
-//			}
-//			serviceToQueue.get(broadcastToQueue.get(b.getClass()).poll()).add(b);
-//		}
-		for(MicroService q: broadcastToQueue.get(b.getClass())) {
-			synchronized (serviceToQueue.get(q)) {
-				serviceToQueue.get(q).add(b);
-				serviceToQueue.get(q).notify();
+		synchronized (b.getClass().getName()) {
+			if (broadcastToQueue.get(b.getClass()) == null || broadcastToQueue.get(b.getClass()).isEmpty()) {
+				return;
 			}
 		}
+		broadcastToQueue.get(b.getClass()).forEach(microService -> {
+			synchronized (serviceToQueue.get(microService)) {
+				serviceToQueue.get(microService).add(b);
+				serviceToQueue.get(microService).notify();
+			}
+		});
 	}
 
 	@Override
 	public <T> Future<T> sendEvent(Event<T> e) {
-		if(eventToQueue.get(e.getClass()) == null||eventToQueue.get(e.getClass()).isEmpty()){// or empty
-			return null;
+		MicroService m;
+		synchronized (e.getClass().getName()) {
+			if(eventToQueue.get(e.getClass()) == null || eventToQueue.get(e.getClass()).isEmpty()){// or empty
+				return null;
+			}
+			eventToQueue.get(e.getClass()).add(m = eventToQueue.get(e.getClass()).poll());
 		}
 		Future<T> futureObj = new Future<>();
 		eventToFuture.put(e, futureObj);
-		MicroService m;
-		//We should check here the round robbin.
-		eventToQueue.get(e.getClass()).add(m = eventToQueue.get(e.getClass()).poll());
 		synchronized (serviceToQueue.get(m)) {
 			serviceToQueue.get(m).add(e);
 			serviceToQueue.get(m).notifyAll();
@@ -87,29 +88,26 @@ public class MessageBusImpl implements MessageBus {
 		return futureObj;
 	}
 
-	//Maybe the new make it not able to reach.
 	@Override
+	//Should be sync?
 	public void register(MicroService m) {
 		ConcurrentLinkedQueue concQ = new ConcurrentLinkedQueue();
 		serviceToQueue.put(m ,concQ);
 	}
 
-	private boolean checkIdentity(MicroService m, MicroService m2) {
-		if(m == m2)
-			return true;
-		return false;
-	}
 	@Override
+	//Should be sync?
 	public void unregister(MicroService m) {
 		ConcurrentLinkedQueue tempQ;
-		tempQ = serviceToQueue.get(m);//Does we get here a specific key or we have many keys that is the same as the class of the instance of the MS m?
+		tempQ = serviceToQueue.get(m);
 		if(tempQ == null){
 			return;
 		}
-//
-		eventToQueue.forEach((ev,qu) -> qu.forEach(ms-> {if(ms == m) qu.remove(m);} ));
-//		for(int i=0;i<eventToQueue.size();i++)
-
+		eventToQueue.forEach((ev,qu) -> qu.forEach(ms-> {
+			if(ms == m){
+				qu.remove(m);
+			}
+		}));
 		synchronized (serviceToQueue.get(m)) {
 			while (!tempQ.isEmpty()) {
 				tempQ.remove();
