@@ -15,15 +15,16 @@ import bgu.spl.mics.application.passiveObjects.Customer;
 public class APIService extends MicroService{
 
 	Customer me;
-	public APIService() {
-		super("Change_This_Name");
+	//receipts in list? need to save it on register but need to save issue/process ticks
+	public APIService(Customer customer) {
+		super("Web API of "+customer.getName());
+		this.me=customer;
 
 	}
 
 	@Override
 	protected void initialize() {
-		// TODO Implement this
-		
+
 	}
 
 }

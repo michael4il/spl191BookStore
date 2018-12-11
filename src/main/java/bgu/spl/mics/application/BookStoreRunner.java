@@ -8,14 +8,15 @@ import bgu.spl.mics.application.passiveObjects.Inventory;
 import bgu.spl.mics.application.passiveObjects.ResourcesHolder;
 import bgu.spl.mics.application.services.TimeService;
 import com.google.gson.*;
+import javafx.util.Pair;
+import bgu.spl.mics.application.passiveObjects.Customer;
 
-import java.util.Iterator;
-import  java.util.Map;
+
+import java.util.*;
 
 
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Vector;
 
 /** This is the Main class of the application. You should parse the input file,
  * create the different instances of the objects, and run the system.
@@ -47,11 +48,32 @@ public class BookStoreRunner {//testing
             veichles[i]=new DeliveryVehicle(car.get("license").getAsInt(),car.get("speed").getAsInt());
         }
         ResourcesHolder.getInstance().load(veichles);
+        //********************************************************SERVICES********************************
+        JsonObject Services=jsoninput.get("services").getAsJsonObject();
+        JsonArray Customers=Services.get("customers").getAsJsonArray();
+        for(int i=0;i<Customers.size();i++) {
+            List<Pair<String, Integer>> orderlist = new LinkedList<>();
+            JsonArray Jorders = Customers.get(i).getAsJsonObject().get("orderSchedule").getAsJsonArray();
+            for (int k = 0; k < Jorders.size(); k++) {
+                JsonObject Jpair = Jorders.get(k).getAsJsonObject();
+                Pair<String, Integer> pair = new Pair<>(Jpair.get("bookTitle").getAsString(), Jpair.get("tick").getAsInt());
+                ((LinkedList<Pair<String, Integer>>) orderlist).push(pair);
+            }
+
+            JsonObject JC = Customers.get(i).getAsJsonObject();//Json Customer
+            Customer Customer =new Customer(JC.get("id").getAsInt(),JC.get("name").getAsString(), JC.get("address").getAsString(), JC.get("distance").getAsInt(),
+                    JC.get("creditCard").getAsJsonObject().get("number").getAsInt(),
+                    JC.get("creditCard").getAsJsonObject().get("amount").getAsInt(),orderlist);
+
+            //Here comes APIService initialize ? YES!
+             }}
+        }
 
 
 
 
 
-    }
 
-}
+
+
+

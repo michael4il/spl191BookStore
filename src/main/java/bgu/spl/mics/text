@@ -7,9 +7,9 @@ start ev-handler hand1 5
 start ev-handler hand2 5
 start ev-handler hand3 5
 start ev-handler hand5 5
+start ev-handler hand7 5
 
 start sender sender2 broadcast
-start sender sender2 event
 start sender sender3 event
 start sender sender4 broadcast
 start sender sender5 event
