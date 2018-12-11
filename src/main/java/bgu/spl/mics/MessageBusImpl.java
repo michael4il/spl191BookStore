@@ -2,6 +2,7 @@ package bgu.spl.mics;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.BiConsumer;
 
 /**
  * The {@link MessageBusImpl class is the implementation of the MessageBus interface.
@@ -71,7 +72,7 @@ public class MessageBusImpl implements MessageBus {
 
 	@Override
 	public <T> Future<T> sendEvent(Event<T> e) {
-		if(eventToQueue.get(e.getClass()) == null){
+		if(eventToQueue.get(e.getClass()) == null||eventToQueue.get(e.getClass()).isEmpty()){// or empty
 			return null;
 		}
 		Future<T> futureObj = new Future<>();
@@ -93,6 +94,11 @@ public class MessageBusImpl implements MessageBus {
 		serviceToQueue.put(m ,concQ);
 	}
 
+	private boolean checkIdentity(MicroService m, MicroService m2) {
+		if(m == m2)
+			return true;
+		return false;
+	}
 	@Override
 	public void unregister(MicroService m) {
 		ConcurrentLinkedQueue tempQ;
@@ -100,6 +106,10 @@ public class MessageBusImpl implements MessageBus {
 		if(tempQ == null){
 			return;
 		}
+//
+		eventToQueue.forEach((ev,qu) -> qu.forEach(ms-> {if(ms == m) qu.remove(m);} ));
+//		for(int i=0;i<eventToQueue.size();i++)
+
 		synchronized (serviceToQueue.get(m)) {
 			while (!tempQ.isEmpty()) {
 				tempQ.remove();
