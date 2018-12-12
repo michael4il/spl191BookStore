@@ -1,6 +1,9 @@
 package bgu.spl.mics.application.services;
 
+import bgu.spl.mics.Messages.Broadcasts.BookOrderEvent;
+import bgu.spl.mics.Messages.Broadcasts.Tick;
 import bgu.spl.mics.MicroService;
+import bgu.spl.mics.application.passiveObjects.MoneyRegister;
 
 /**
  * Selling service in charge of taking orders from customers.
@@ -13,16 +16,24 @@ import bgu.spl.mics.MicroService;
  * You MAY change constructor signatures and even add new public constructors.
  */
 public class SellingService extends MicroService{
+	private MoneyRegister moneyRegister;
+	private int currectTick;
+	public SellingService(int num) {
+		super("SellingService"+num);
+		moneyRegister=MoneyRegister.getInstance();
+		currectTick=0;
 
-	public SellingService() {
-		super("Change_This_Name");
-		// TODO Implement this
 	}
 
 	@Override
 	protected void initialize() {
-		// TODO Implement this
-		
-	}
 
-}
+		subscribeBroadcast(Tick.class, message->{
+			currectTick=message.getTickNumber();
+			System.out.println(getName() +"  time : "+currectTick);
+	});
+		subscribeEvent(BookOrderEvent.class,message->{
+
+		});
+
+}}

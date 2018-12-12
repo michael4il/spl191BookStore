@@ -48,6 +48,7 @@ public class MessageBusImpl implements MessageBus {
 			}
 		}
 		broadcastToQueue.get(type).add(m);
+		System.out.println("subscribed to broadcast "+type);
 	}
 
 	@Override
@@ -57,6 +58,7 @@ public class MessageBusImpl implements MessageBus {
 
 	@Override
 	public void  sendBroadcast(Broadcast b) {
+
 		synchronized (b.getClass().getName()) {
 			if (broadcastToQueue.get(b.getClass()) == null || broadcastToQueue.get(b.getClass()).isEmpty()) {
 				return;
@@ -68,6 +70,7 @@ public class MessageBusImpl implements MessageBus {
 				serviceToQueue.get(microService).notify();
 			}
 		});
+
 	}
 
 	@Override
@@ -85,6 +88,7 @@ public class MessageBusImpl implements MessageBus {
 			serviceToQueue.get(m).add(e);
 			serviceToQueue.get(m).notifyAll();
 		}
+
 		return futureObj;
 	}
 

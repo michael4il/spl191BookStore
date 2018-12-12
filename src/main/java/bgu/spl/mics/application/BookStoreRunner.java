@@ -6,6 +6,8 @@ import bgu.spl.mics.application.passiveObjects.BookInventoryInfo;
 import bgu.spl.mics.application.passiveObjects.DeliveryVehicle;
 import bgu.spl.mics.application.passiveObjects.Inventory;
 import bgu.spl.mics.application.passiveObjects.ResourcesHolder;
+import bgu.spl.mics.application.services.APIService;
+import bgu.spl.mics.application.services.SellingService;
 import bgu.spl.mics.application.services.TimeService;
 import com.google.gson.*;
 import javafx.util.Pair;
@@ -48,7 +50,9 @@ public class BookStoreRunner {//testing
             veichles[i]=new DeliveryVehicle(car.get("license").getAsInt(),car.get("speed").getAsInt());
         }
         ResourcesHolder.getInstance().load(veichles);
-        //********************************************************SERVICES********************************
+        //********************************************************SERVICES********************************************
+
+        //**********************************************CUSTOMERS*****************************************************
         JsonObject Services=jsoninput.get("services").getAsJsonObject();
         JsonArray Customers=Services.get("customers").getAsJsonArray();
         for(int i=0;i<Customers.size();i++) {
@@ -65,8 +69,32 @@ public class BookStoreRunner {//testing
                     JC.get("creditCard").getAsJsonObject().get("number").getAsInt(),
                     JC.get("creditCard").getAsJsonObject().get("amount").getAsInt(),orderlist);
 
-            //Here comes APIService initialize ? YES!
-             }}
+            APIService ApiService= new APIService(Customer);
+            Thread ApiThread= new Thread(ApiService);
+            ApiThread.start();
+
+
+             }
+             int sellingCount =Services.get("selling").getAsInt();
+            for (int i=0;i<sellingCount;i++)
+            {
+                SellingService sellingService = new SellingService(i);
+                Thread sellingThread=new Thread(sellingService);
+                sellingThread.start();
+
+            }
+           //**********************************************************************TIME***************************************************
+
+        Services.get("time").getAsJsonObject().get("speed").getAsInt();
+        Services.get("time").getAsJsonObject().get("duration").getAsInt();
+           TimeService timeService= new TimeService(Services.get("time").getAsJsonObject().get("speed").getAsInt(),Services.get("time").getAsJsonObject().get("duration").getAsInt());
+           Thread timeThread = new Thread(timeService);
+           timeThread.start();
+
+    }
+
+
+
         }
 
 

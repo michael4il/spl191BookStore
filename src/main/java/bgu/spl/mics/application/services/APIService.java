@@ -1,7 +1,11 @@
 package bgu.spl.mics.application.services;
 
+import bgu.spl.mics.Future;
+import bgu.spl.mics.Messages.Broadcasts.BookOrderEvent;
+import bgu.spl.mics.Messages.Broadcasts.Tick;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.passiveObjects.Customer;
+import bgu.spl.mics.application.passiveObjects.OrderReceipt;
 
 /**
  * APIService is in charge of the connection between a client and the store.
@@ -15,16 +19,37 @@ import bgu.spl.mics.application.passiveObjects.Customer;
 public class APIService extends MicroService{
 
 	Customer me;
+	int currectTick;
 	//receipts in list? need to save it on register but need to save issue/process ticks
 	public APIService(Customer customer) {
-		super("Web API of "+customer.getName());
+		super("WebAPI of  "+customer.getName());
 		this.me=customer;
 
 	}
 
 	@Override
-	protected void initialize() {
+	protected  void initialize() {
+
+		subscribeBroadcast(Tick.class, message->{
+			currectTick=message.getTickNumber();
+			System.out.println(getName() +"  time : "+currectTick);
+			while(!me.getOrderlist().isEmpty() && me.getOrderlist().get(0).getValue()==currectTick)
+			{
+				System.out.println("**********************************************BookOrderEvent Send");
+				OrderReceipt receipt=new OrderReceipt(me.getOrderlist().get(0).getValue(),me.getOrderlist().get(0).toString(),me.getId());
+				Future<OrderReceipt>future = sendEvent(new BookOrderEvent(me,receipt));
+				me.getOrderlist().remove(0);
+			}
+//			*****************************************************DELIVERY  EVENT********************************************
+			// make a list of futures?
+
+//					if(future.isDone()) {
+//						OrderReceipt receipt = future.get();
+//						if(receipt!=null) {
+//							sendEvent(new DeliveryEvent(customer));
+
+		});
+
 
 	}
-
 }

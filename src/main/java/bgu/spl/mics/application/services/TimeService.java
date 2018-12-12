@@ -27,6 +27,7 @@ public class TimeService extends MicroService{
 		@Override
 		public void run() {
 			tickBroadcast = new Tick(currentTick);
+			System.out.println("tick "+currentTick);
 			currentTick++;
 			if (currentTick >= duration) {
 				terminate();
@@ -36,16 +37,20 @@ public class TimeService extends MicroService{
 		}
 	};
 
-	public TimeService(int speed,int duration) {
+	public  TimeService(int speed,int duration) {
 		super("Timer Service");
 		delayinMiliSec = speed;
 		this.duration = duration;
+
+
 	}
 
 	//The init should be after all other services are registered.
 	@Override
-	protected void initialize() {
-		timer.schedule(task, delayinMiliSec);
+	protected synchronized void initialize() {
+		try{wait(1000);}catch (InterruptedException e){}
+		//timer.schedule(task, delayinMiliSec);
+		timer.scheduleAtFixedRate(task,0,delayinMiliSec);
 	}
 
 }

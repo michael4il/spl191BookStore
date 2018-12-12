@@ -20,7 +20,7 @@ public class Customer {
 	private List<OrderReceipt> list;
 	private int creditCard;
 	private int availableAmountInCreditCard;
-	private List<Pair<String, Integer>> orderlist;
+	private List<Pair<String, Integer>> orderlist;// increasing order
 
 
 
@@ -48,5 +48,6 @@ public class Customer {
 	public List<OrderReceipt> getCustomerReceiptList() { return list; }
 	public int getAvailableCreditAmount() { return availableAmountInCreditCard; }      // GETS
 	public int getCreditNumber() { return creditCard; }
+
 	
 }

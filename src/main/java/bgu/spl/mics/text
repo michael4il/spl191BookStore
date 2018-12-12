@@ -14,3 +14,8 @@ start sender sender3 event
 start sender sender4 broadcast
 start sender sender5 event
 quit
+
+
+
+*enter input file path in : "edit configurations" -> "Program arguments"
+include \mics\input.txt
