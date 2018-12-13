@@ -1,7 +1,7 @@
 {
   "initialInventory": [
   {"bookTitle": "Harry Poter", "amount": 10, "price": 90},
-  {"bookTitle": "The Hunger Games", "amount": 90, "price": 102}
+  {"bookTitle": "The Hunger Games", "amount": 90, "price": 120}
   ],
   "initialResources":[
    {"vehicles":[
@@ -25,7 +25,7 @@
         "name": "Bruria",
         "address": "NewYork 123",
         "distance":33,
-        "creditCard":{"number":67890,"amount":88},
+        "creditCard":{"number":67890,"amount":90},
         "orderSchedule": [
             {"bookTitle": "Harry Poter", "tick": 2},
             {"bookTitle": "The Hunger Games", "tick": 4}
@@ -39,7 +39,7 @@
         "distance":12,
          "creditCard":{"number":453536,"amount":220},
     "orderSchedule": [
-        {"bookTitle": "The Hunger Games", "tick": 7}
+        {"bookTitle": "The Hunger Games", "tick": 6}
     ]
     }
   ]

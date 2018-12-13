@@ -30,12 +30,13 @@ public class APIService extends MicroService{
 	@Override
 	protected  void initialize() {
 
+
 		subscribeBroadcast(Tick.class, message->{
 			currectTick=message.getTickNumber();
 			System.out.println(getName() +"  time : "+currectTick);
 			while(!me.getOrderlist().isEmpty() && me.getOrderlist().get(0).getValue()==currectTick)
 			{
-				OrderReceipt receipt=new OrderReceipt(me.getOrderlist().get(0).getValue(),me.getOrderlist().get(0).toString(),me.getId());//
+				OrderReceipt receipt=new OrderReceipt(me.getOrderlist().get(0).getValue(),me.getOrderlist().get(0).getKey(),me.getId());//
 				Future<OrderReceipt>future = sendEvent(new BookOrderEvent(me,receipt));
 				me.getOrderlist().remove(0);
 			}

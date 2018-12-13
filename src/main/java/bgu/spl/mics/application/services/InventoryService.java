@@ -1,5 +1,8 @@
 package bgu.spl.mics.application.services;
 
+import bgu.spl.mics.Messages.Broadcasts.AcquireBookEvent;
+import bgu.spl.mics.Messages.Broadcasts.CheckAvailabiltyAndGetPriceEvent;
+import bgu.spl.mics.Messages.Broadcasts.Tick;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.passiveObjects.Inventory;
 
@@ -15,15 +18,29 @@ import bgu.spl.mics.application.passiveObjects.Inventory;
 
 public class InventoryService extends MicroService{
 	Inventory inv = Inventory.getInstance();
+	int currectTick;
 
-	public InventoryService() {
-		super("");
+	public InventoryService(int i) {
+		super("InventoryService "+i);
 	}
 
 	@Override
 	protected void initialize() {
-		// TODO Implement this
-		
+		//************************************************TIME******************************
+		subscribeBroadcast(Tick.class, message->{
+			currectTick=message.getTickNumber();
+			System.out.println(getName() +"  time : "+currectTick);
+		});
+		//***********************************************Subscribe CheckAvailability**************************
+		subscribeEvent(CheckAvailabiltyAndGetPriceEvent.class, (message)->{
+			String book= message.getReceipt().getBookTitle();
+			int price=Inventory.getInstance().checkAvailabiltyAndGetPrice(book);
+			complete(message,price);
+		});
+		//**********************************************SUBSCRIBE ACQUIRE****************************************************
+		subscribeEvent(AcquireBookEvent.class, (message)->{
+
+		});
 	}
 
 }

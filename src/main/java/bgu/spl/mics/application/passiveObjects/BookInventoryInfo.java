@@ -22,8 +22,8 @@ public class BookInventoryInfo {
 	public String getBookTitle() { return bookTitle; }
 	public int getAmountInInventory() { return currentAmount; }
 	public int getPrice() { return price; }
-	
 
-
-	
+	public void setCurrentAmount(int currentAmount) {
+		this.currentAmount = currentAmount;
+	}
 }

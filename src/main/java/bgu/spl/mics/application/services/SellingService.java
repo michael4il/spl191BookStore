@@ -51,10 +51,11 @@ public class SellingService extends MicroService{
 
 			Future<Integer> bookPriceFuture= sendEvent(new CheckAvailabiltyAndGetPriceEvent(orderDetails));//MUST CHECK! why not sending event
 
-			//shows null pointer instead of waiting
+
 			int price=bookPriceFuture.get();//here comes the waiting
 			if(price != -1 && customer.getAvailableCreditAmount()>=price)
 			{
+
 				//locking happens here because of MoneyRegister.chargeCreditCard
 				synchronized (customer) {
 					Future<OrderResult> orderResultFuture = sendEvent(new AcquireBookEvent(orderDetails, customer));// need to update receipt price

@@ -7,6 +7,7 @@ import bgu.spl.mics.application.passiveObjects.DeliveryVehicle;
 import bgu.spl.mics.application.passiveObjects.Inventory;
 import bgu.spl.mics.application.passiveObjects.ResourcesHolder;
 import bgu.spl.mics.application.services.APIService;
+import bgu.spl.mics.application.services.InventoryService;
 import bgu.spl.mics.application.services.SellingService;
 import bgu.spl.mics.application.services.TimeService;
 import com.google.gson.*;
@@ -83,6 +84,15 @@ public class BookStoreRunner {//testing
                 sellingThread.start();
 
             }
+            //*******************************************************************LOGISTICS************************
+       int inventoryCount= Services.get("inventoryService").getAsInt();
+            for(int i=0;i<inventoryCount;i++)
+            {
+                InventoryService inventoryService = new InventoryService(i);
+                Thread inventoryThread = new Thread(inventoryService);
+                inventoryThread.start();
+            }
+
            //**********************************************************************TIME***************************************************
 
         Services.get("time").getAsJsonObject().get("speed").getAsInt();

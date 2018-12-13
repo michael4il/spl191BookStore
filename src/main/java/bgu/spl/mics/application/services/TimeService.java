@@ -27,7 +27,7 @@ public class TimeService extends MicroService{
 		@Override
 		public void run() {
 			tickBroadcast = new Tick(currentTick);
-			System.out.println("tick "+currentTick);
+			System.out.println("\ntick "+currentTick);
 			currentTick++;
 			if (currentTick >= duration) {
 				terminate();

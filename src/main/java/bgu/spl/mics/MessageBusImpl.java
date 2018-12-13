@@ -88,7 +88,7 @@ public class MessageBusImpl implements MessageBus {
 			serviceToQueue.get(m).notifyAll();
 		}
 
-		System.out.println("*****************************EVENT SEND                "+ e.getClass());
+		System.out.println("*****************************           EVENT SENT    "+ e.getClass().getSimpleName());
 		return futureObj;
 	}
 

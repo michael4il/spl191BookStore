@@ -14,8 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * You can add ONLY private fields and methods to this class as you see fit.
  */
 public class Inventory {
-	private ConcurrentHashMap<String, Integer> bookNametoPrice = new ConcurrentHashMap<>();
-	private ConcurrentHashMap<String, Integer> bookNametoAmount = new ConcurrentHashMap<>();
+	private ConcurrentHashMap<String, BookInventoryInfo> bookNametoInfo = new ConcurrentHashMap<>();
 	private static class SingletonHolder{
 		private static Inventory instance = new Inventory();
 	}
@@ -35,6 +34,10 @@ public class Inventory {
      */
 	//Not sync
 	public void load (BookInventoryInfo[ ] inventory ) {
+		for (BookInventoryInfo bookInfo : inventory)
+		{
+			bookNametoInfo.put(bookInfo.getBookTitle(),bookInfo);
+		}
 		
 	}
 	
@@ -48,8 +51,17 @@ public class Inventory {
      */
 	//Maybe sync on the book
 	public OrderResult take (String book) {
-		
-		return null;
+		BookInventoryInfo bookInfo= bookNametoInfo.get(book);
+		synchronized (bookInfo)//Deadlock potential
+		{
+			if(bookInfo.getAmountInInventory()>1){
+				bookInfo.setCurrentAmount(bookInfo.getAmountInInventory()-1);
+			return OrderResult.SUCCESSFULLY_TAKEN;}
+			else
+			{
+				return OrderResult.NOT_IN_STOCK;
+			}
+		}
 	}
 	
 	
@@ -63,7 +75,10 @@ public class Inventory {
 	// sync if the output depends on the 'take' method.
 	//Probably YES!
 	public int checkAvailabiltyAndGetPrice(String book) {
-		//TODO: Implement this
+		if(bookNametoInfo.get(book)!=null)
+		{
+			return bookNametoInfo.get(book).getPrice();
+		}
 		return -1;
 	}
 	
