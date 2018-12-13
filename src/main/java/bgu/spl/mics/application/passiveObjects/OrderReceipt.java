@@ -33,4 +33,40 @@ public class OrderReceipt {
 	public int getIssuedTick() { return issueTick; }
 	public int getOrderTick() { return orderTick; }
 	public int getProcessTick() { return processTick; }
+
+	public int getIssueTick() {
+		return issueTick;
+	}
+
+	public void setOrderID(int orderID) {
+		this.orderID = orderID;
+	}
+
+	public void setSeller(String seller) {
+		this.seller = seller;
+	}
+
+	public void setCustomerId(int customerId) {
+		this.customerId = customerId;
+	}
+
+	public void setBookTitle(String bookTitle) {
+		this.bookTitle = bookTitle;
+	}
+
+	public void setPrice(int price) {
+		this.price = price;
+	}
+
+	public void setIssueTick(int issueTick) {
+		this.issueTick = issueTick;
+	}
+
+	public void setOrderTick(int orderTick) {
+		this.orderTick = orderTick;
+	}
+
+	public void setProcessTick(int processTick) {
+		this.processTick = processTick;
+	}
 }

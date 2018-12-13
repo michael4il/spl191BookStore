@@ -48,7 +48,6 @@ public class MessageBusImpl implements MessageBus {
 			}
 		}
 		broadcastToQueue.get(type).add(m);
-		System.out.println("subscribed to broadcast "+type);
 	}
 
 	@Override
@@ -89,6 +88,7 @@ public class MessageBusImpl implements MessageBus {
 			serviceToQueue.get(m).notifyAll();
 		}
 
+		System.out.println("*****************************EVENT SEND                "+ e.getClass());
 		return futureObj;
 	}
 

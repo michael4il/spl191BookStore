@@ -32,10 +32,12 @@ public class Future<T> {
 	 */
 	public synchronized T get() {
 		while(!isDone.get()){
+			System.out.println("waiting...");
 			try {
 				wait();
-			}catch (InterruptedException interE) {}
+			}catch (InterruptedException e) {}
 		}
+		System.out.println("NOT WAITING");
 		return result;
 	}
 
