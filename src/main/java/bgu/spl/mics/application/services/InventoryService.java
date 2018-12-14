@@ -5,6 +5,7 @@ import bgu.spl.mics.Messages.Broadcasts.CheckAvailabiltyAndGetPriceEvent;
 import bgu.spl.mics.Messages.Broadcasts.Tick;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.passiveObjects.Inventory;
+import bgu.spl.mics.application.passiveObjects.OrderResult;
 
 /**
  * InventoryService is in charge of the book inventory and stock.
@@ -17,7 +18,7 @@ import bgu.spl.mics.application.passiveObjects.Inventory;
  */
 
 public class InventoryService extends MicroService{
-	Inventory inv = Inventory.getInstance();
+	Inventory Inv = Inventory.getInstance();
 	int currectTick;
 
 	public InventoryService(int i) {
@@ -39,7 +40,8 @@ public class InventoryService extends MicroService{
 		});
 		//**********************************************SUBSCRIBE ACQUIRE****************************************************
 		subscribeEvent(AcquireBookEvent.class, (message)->{
-
+			OrderResult orderResult=Inv.take(message.getOrderReceipt().getBookTitle());
+			complete(message,orderResult);
 		});
 	}
 

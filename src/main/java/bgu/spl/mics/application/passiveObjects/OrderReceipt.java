@@ -23,6 +23,11 @@ public class OrderReceipt {
 		this.customerId =customerid;
 
 	}
+	@Override
+	public String toString() {
+		return "-----------------ORDER TOSTRING-------------\nOrder Receipt = " + orderID + "\nSellerID = "+seller+"\ncustomerID = "+ customerId+"\nbookTitle = "+bookTitle+
+				"\nPrice = "+price+"\nissueTick = "+issueTick+"\norderTick = "+orderTick+"\nprocessTick = "+processTick+"\n---------------order end-----------------";
+	}
 
 	//***************************GETS****************************
 	public int getOrderId() { return orderID; }
@@ -69,4 +74,6 @@ public class OrderReceipt {
 	public void setProcessTick(int processTick) {
 		this.processTick = processTick;
 	}
+
+
 }

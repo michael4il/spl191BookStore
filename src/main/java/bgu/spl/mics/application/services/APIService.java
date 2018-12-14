@@ -6,6 +6,10 @@ import bgu.spl.mics.Messages.Broadcasts.Tick;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.passiveObjects.Customer;
 import bgu.spl.mics.application.passiveObjects.OrderReceipt;
+import com.sun.org.apache.xpath.internal.operations.Or;
+
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * APIService is in charge of the connection between a client and the store.
@@ -20,7 +24,8 @@ public class APIService extends MicroService{
 
 	Customer me;
 	int currectTick;
-	//receipts in list? need to save it on register but need to save issue/process ticks
+
+	List<Future<OrderReceipt>> futureList= new LinkedList<>();
 	public APIService(Customer customer) {
 		super("WebAPI of  "+customer.getName());
 		this.me=customer;
@@ -39,6 +44,19 @@ public class APIService extends MicroService{
 				OrderReceipt receipt=new OrderReceipt(me.getOrderlist().get(0).getValue(),me.getOrderlist().get(0).getKey(),me.getId());//
 				Future<OrderReceipt>future = sendEvent(new BookOrderEvent(me,receipt));
 				me.getOrderlist().remove(0);
+				futureList.add(future);
+			}
+
+			while(!futureList.isEmpty()){
+			Future<OrderReceipt> receiptFuture= futureList.get(0);
+			OrderReceipt orderReceipt=receiptFuture.get();
+
+			if(orderReceipt!=null) {
+				System.out.println(orderReceipt);
+				me.getCustomerReceiptList().add(orderReceipt);
+				System.out.println("Customer has  "+me.getAvailableCreditAmount());
+			}
+			futureList.remove(0);
 			}
 //			*****************************************************DELIVERY  EVENT********************************************
 			// make a list of futures?

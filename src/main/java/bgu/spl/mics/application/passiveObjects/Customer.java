@@ -17,7 +17,7 @@ public class Customer {
 	private String name;
 	private String address;
 	private int Distance;
-	private List<OrderReceipt> list;
+	private List<OrderReceipt> list= new LinkedList();
 	private int creditCard;
 	private int availableAmountInCreditCard;
 	private List<Pair<String, Integer>> orderlist;// increasing order
@@ -49,5 +49,7 @@ public class Customer {
 	public int getAvailableCreditAmount() { return availableAmountInCreditCard; }      // GETS
 	public int getCreditNumber() { return creditCard; }
 
-	
+	public void setAvailableAmountInCreditCard(int availableAmountInCreditCard) {
+		this.availableAmountInCreditCard = availableAmountInCreditCard;
+	}
 }

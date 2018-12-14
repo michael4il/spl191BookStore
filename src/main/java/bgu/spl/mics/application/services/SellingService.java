@@ -44,40 +44,41 @@ public class SellingService extends MicroService{
 
 		//********************************************BOOK EVENT SUBSCRIBE**************************************************************************
 		subscribeEvent(BookOrderEvent.class,message->{
-			Customer customer= message.getCustomer();
+			Customer customer= message.getCustomer();//some reference
 			OrderReceipt orderDetails = message.getOrderReceipt();
-			orderDetails.setProcessTick(currectTick);
+			orderDetails.setProcessTick(currectTick);//order update
 
 
-			Future<Integer> bookPriceFuture= sendEvent(new CheckAvailabiltyAndGetPriceEvent(orderDetails));//MUST CHECK! why not sending event
-
-
+			Future<Integer> bookPriceFuture= sendEvent(new CheckAvailabiltyAndGetPriceEvent(orderDetails));
 			int price=bookPriceFuture.get();//here comes the waiting
 			if(price != -1 && customer.getAvailableCreditAmount()>=price)
 			{
 
-				//locking happens here because of MoneyRegister.chargeCreditCard
+				//locking happens here because of MoneyRegister.chargeCreditCard is here
 				synchronized (customer) {
-					Future<OrderResult> orderResultFuture = sendEvent(new AcquireBookEvent(orderDetails, customer));// need to update receipt price
-					OrderResult orderResult = orderResultFuture.get();//waiting here order Details.setSeller(this.getName());
-					moneyRegister.chargeCreditCard(customer,price);
+					Future<OrderResult> orderResultFuture = sendEvent(new AcquireBookEvent(orderDetails, customer));
+
+					OrderResult orderResult = orderResultFuture.get();//waiting here,need to prevent deadlock in final tick and no logistics services available
+
+					if(orderResult==OrderResult.SUCCESSFULLY_TAKEN&&customer.getAvailableCreditAmount()>=price)
+					{
+						System.out.println("Book SUCCESSFULLY_TAKEN");
+						moneyRegister.chargeCreditCard(customer,price);
+						//some order updates
+						orderDetails.setSeller(this.getName());
+						orderDetails.setIssueTick(currectTick);
+						orderDetails.setPrice(price);
+
+						MoneyRegister.getInstance().file(orderDetails);//we need to make new receipt?
+
+						complete(message,orderDetails);
+					}
+					else{
+						System.out.println("Book Denied error *2fast4u*");
+						complete(message,null);}
 				}
-
-
 			}
-
-			{
-
-
-				orderDetails.setIssueTick(currectTick);
-
-
-
-
-
-
-			}
-
+			complete(message,null);//check availability
 
 		});
 
