@@ -27,12 +27,14 @@ import java.io.IOException;
  */
 public class BookStoreRunner {//testing
     public static void main(String[] args) throws IOException{
+        HashMap<Integer,Customer> customers=new HashMap<>();
         JsonObject jsoninput ;
         JsonParser parser = new JsonParser();
         try (FileReader fileReader = new FileReader(args[0]))
         { jsoninput=parser.parse(fileReader).getAsJsonObject();}
         catch (IOException e ) {throw e;}
-        //**********************************************************INVENTORY**********************************************
+
+        //*******************************************************INVENTORY*****************************************************
         JsonArray JInv = jsoninput.getAsJsonArray("initialInventory");
         BookInventoryInfo[] books = new BookInventoryInfo[JInv.size()];
         for(int i=0;i<books.length;i++)
@@ -42,7 +44,7 @@ public class BookStoreRunner {//testing
         }
         Inventory.getInstance().load(books);
 
-        //*********************************************************VEHICLES***********************************************
+        //*********************************************************VEHICLES****************************************************
         JsonArray Jveihcles = jsoninput.getAsJsonArray("initialResources").get(0).getAsJsonObject().get("vehicles").getAsJsonArray();
         DeliveryVehicle[] veichles = new DeliveryVehicle[Jveihcles.size()];
         for(int i=0;i<veichles.length;i++)
@@ -51,9 +53,10 @@ public class BookStoreRunner {//testing
             veichles[i]=new DeliveryVehicle(car.get("license").getAsInt(),car.get("speed").getAsInt());
         }
         ResourcesHolder.getInstance().load(veichles);
-        //********************************************************SERVICES********************************************
 
-        //**********************************************CUSTOMERS*****************************************************
+        //----------------------------------------------------------SERVICES-----------------------------------------------------
+
+        //**********************************************************CUSTOMERS*****************************************************
         JsonObject Services=jsoninput.get("services").getAsJsonObject();
         JsonArray Customers=Services.get("customers").getAsJsonArray();
         for(int i=0;i<Customers.size();i++) {
@@ -71,6 +74,7 @@ public class BookStoreRunner {//testing
                     JC.get("creditCard").getAsJsonObject().get("amount").getAsInt(),orderlist);
 
             APIService ApiService= new APIService(Customer);
+            customers.put(Customer.getId(),Customer);
             Thread ApiThread= new Thread(ApiService);
             ApiThread.start();
 
@@ -84,7 +88,7 @@ public class BookStoreRunner {//testing
                 sellingThread.start();
 
             }
-            //*******************************************************************LOGISTICS************************
+            //*************************************************************LOGISTICS****************************************************************
        int inventoryCount= Services.get("inventoryService").getAsInt();
             for(int i=0;i<inventoryCount;i++)
             {
@@ -93,13 +97,18 @@ public class BookStoreRunner {//testing
                 inventoryThread.start();
             }
 
-           //**********************************************************************TIME***************************************************
+           //******************************************************************TIME******************************************************************
 
         Services.get("time").getAsJsonObject().get("speed").getAsInt();
         Services.get("time").getAsJsonObject().get("duration").getAsInt();
            TimeService timeService= new TimeService(Services.get("time").getAsJsonObject().get("speed").getAsInt(),Services.get("time").getAsJsonObject().get("duration").getAsInt());
            Thread timeThread = new Thread(timeService);
            timeThread.start();
+           //when we start ,need to fix sending event in first tick block tick event
+         //when we end, need to fix deadlock
+//----------------------------------------------------------------------------PARSING------------------------------------------------------------------
+        Inventory.getInstance().printInventoryToFile(args[2]);
+        //need to parse recepits,customers,moneyregister
 
     }
 

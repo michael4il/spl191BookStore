@@ -19,3 +19,7 @@ quit
 
 *enter input file path in : "edit configurations" -> "Program arguments"
 include \mics\input.txt
+
+  //when we start ,need to fix sending event in first tick block tick event
+         //when we end, need to fix deadlock = we can use future.get(time limt) busy wait,only needed in 2 service types
+    //need to parse recepits,customers,moneyregister

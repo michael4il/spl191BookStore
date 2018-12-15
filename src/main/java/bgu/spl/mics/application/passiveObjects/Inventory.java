@@ -1,6 +1,9 @@
 package bgu.spl.mics.application.passiveObjects;
 
-
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -91,7 +94,25 @@ public class Inventory {
      * their respective available amount in the inventory. 
      * This method is called by the main method in order to generate the output.
      */
-	public void printInventoryToFile(String filename){
-		//TODO: Implement this
+//	eventToQueue.forEach((ev,qu) -> qu.forEach(ms-> {
+//		if(ms == m){
+//			qu.remove(m);
+//		}
+//	}));
+	public void printInventoryToFile(String filename){//make new map for output
+		HashMap<String, Integer> hashmap = new HashMap();
+		bookNametoInfo.forEach((book,b)->hashmap.put(b.getBookTitle(),b.getAmountInInventory()));
+		try
+		{
+			FileOutputStream fileStream = new FileOutputStream(filename);
+			ObjectOutputStream objectStream = new ObjectOutputStream(fileStream);
+			objectStream.writeObject(hashmap);
+			objectStream.close();
+			fileStream.close();
+
+		}catch(IOException ioe) {
+			ioe.printStackTrace();
+		}
+
 	}
 }
