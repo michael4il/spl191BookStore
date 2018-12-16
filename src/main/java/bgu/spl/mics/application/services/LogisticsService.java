@@ -1,6 +1,12 @@
 package bgu.spl.mics.application.services;
 
+import bgu.spl.mics.Future;
+import bgu.spl.mics.Messages.Broadcasts.AskForVehicle;
+import bgu.spl.mics.Messages.Broadcasts.DeliveryEvent;
+import bgu.spl.mics.Messages.Broadcasts.ReleaseVehicleEvent;
+import bgu.spl.mics.Messages.Broadcasts.Tick;
 import bgu.spl.mics.MicroService;
+import bgu.spl.mics.application.passiveObjects.DeliveryVehicle;
 
 /**
  * Logistic service in charge of delivering books that have been purchased to customers.
@@ -13,15 +19,32 @@ import bgu.spl.mics.MicroService;
  */
 public class LogisticsService extends MicroService {
 
-	public LogisticsService() {
-		super("Change_This_Name");
-		// TODO Implement this
+	private int currectTick = 0;
+	public LogisticsService(int i) {
+		super("LogisticsService " + i);
 	}
 
+	@SuppressWarnings("Duplicates")
 	@Override
 	protected void initialize() {
-		// TODO Implement this
-		
+		subscribeBroadcast(Tick.class, message->{
+			currectTick=message.getTickNumber();
+			System.out.println(getName() +"  time : "+currectTick);
+			if(message.getLast()) {
+				terminate();
+			}
+		});
+		subscribeEvent(DeliveryEvent.class, message -> {
+			System.out.println("Received DeliveryEvent with: " + message.getCustomer().getName());
+			Future<DeliveryVehicle> futureVehicleThatWillDeliver = sendEvent(new AskForVehicle());
+			try {
+				DeliveryVehicle vehicleThatWillDeliver = futureVehicleThatWillDeliver.get();
+				vehicleThatWillDeliver.deliver(message.getCustomer().getAddress(),message.getCustomer().getDistance() );
+				sendEvent(new ReleaseVehicleEvent(vehicleThatWillDeliver));
+			}
+			//Can be nullpointer because the last Tick make it null, and the sleep may throw interrupted exception.
+			catch (Exception e){}
+		});
 	}
 
 }

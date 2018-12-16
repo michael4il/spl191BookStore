@@ -6,10 +6,7 @@ import bgu.spl.mics.application.passiveObjects.BookInventoryInfo;
 import bgu.spl.mics.application.passiveObjects.DeliveryVehicle;
 import bgu.spl.mics.application.passiveObjects.Inventory;
 import bgu.spl.mics.application.passiveObjects.ResourcesHolder;
-import bgu.spl.mics.application.services.APIService;
-import bgu.spl.mics.application.services.InventoryService;
-import bgu.spl.mics.application.services.SellingService;
-import bgu.spl.mics.application.services.TimeService;
+import bgu.spl.mics.application.services.*;
 import com.google.gson.*;
 import bgu.spl.mics.application.passiveObjects.*;
 
@@ -18,6 +15,7 @@ import bgu.spl.mics.application.passiveObjects.*;
 import bgu.spl.mics.application.passiveObjects.Customer;
 
 
+import javax.annotation.Resources;
 import java.util.*;
 
 
@@ -82,42 +80,59 @@ public class BookStoreRunner {//testing
             ApiThread.start();
 
 
-             }
-             int sellingCount =Services.get("selling").getAsInt();
-            for (int i=0;i<sellingCount;i++)
-            {
-                SellingService sellingService = new SellingService(i);
-                Thread sellingThread=new Thread(sellingService);
-                sellingThread.start();
+        }
+        int sellingCount =Services.get("selling").getAsInt();
+        for (int i=0;i<sellingCount;i++)
+        {
+            SellingService sellingService = new SellingService(i);
+            Thread sellingThread=new Thread(sellingService);
+            sellingThread.start();
 
-            }
-            //*************************************************************LOGISTICS****************************************************************
-       int inventoryCount= Services.get("inventoryService").getAsInt();
-            for(int i=0;i<inventoryCount;i++)
-            {
-                InventoryService inventoryService = new InventoryService(i);
-                Thread inventoryThread = new Thread(inventoryService);
-                inventoryThread.start();
-            }
+        }
+        //*************************************************************LOGISTICS****************************************************************
+        int LogisticCount= Services.get("logistics").getAsInt();
+        for(int i=0;i<LogisticCount;i++)
+        {
+            LogisticsService logisticsService = new LogisticsService(i);
+            Thread logisticThread = new Thread(logisticsService);
+            logisticThread.start();
+        }
 
-           //******************************************************************TIME******************************************************************
+        int resourcesCount = Services.get("resourcesService").getAsInt();
+        for(int i=0;i<resourcesCount;i++)
+        {
+            ResourceService resourceService = new ResourceService(i);
+            Thread resourceThread = new Thread(resourceService);
+            resourceThread.start();
+        }
+
+
+        int inventoryCount= Services.get("inventoryService").getAsInt();
+        for(int i=0;i<inventoryCount;i++)
+        {
+            InventoryService inventoryService = new InventoryService(i);
+            Thread inventoryThread = new Thread(inventoryService);
+            inventoryThread.start();
+        }
+
+        //******************************************************************TIME******************************************************************
 
         Services.get("time").getAsJsonObject().get("speed").getAsInt();
         Services.get("time").getAsJsonObject().get("duration").getAsInt();
-           TimeService timeService= new TimeService(Services.get("time").getAsJsonObject().get("speed").getAsInt(),Services.get("time").getAsJsonObject().get("duration").getAsInt());
-           Thread timeThread = new Thread(timeService);
-           timeThread.start();
-           //when we start ,need to fix sending event in first tick block tick event
-         //when we end, need to fix deadlock
+        TimeService timeService= new TimeService(Services.get("time").getAsJsonObject().get("speed").getAsInt(),Services.get("time").getAsJsonObject().get("duration").getAsInt());
+        Thread timeThread = new Thread(timeService);
+        timeThread.start();
+        //when we start ,need to fix sending event in first tick block tick event
+        //when we end, need to fix deadlock
 //----------------------------------------------------------------------------PARSING------------------------------------------------------------------
-       // Inventory.getInstance().printInventoryToFile(args[2]);
+        // Inventory.getInstance().printInventoryToFile(args[2]);
         //need to parse recepits,customers,moneyregister
 
     }
 
 
 
-        }
+}
 
 
 

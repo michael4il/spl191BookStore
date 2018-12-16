@@ -96,11 +96,6 @@ public class Inventory {
 	 * their respective available amount in the inventory.
 	 * This method is called by the main method in order to generate the output.
 	 */
-//	eventToQueue.forEach((ev,qu) -> qu.forEach(ms-> {
-//		if(ms == m){
-//			qu.remove(m);
-//		}
-//	}));
 	public void printInventoryToFile(String filename){//make new map for output
 		HashMap<String, Integer> hashmap = new HashMap();
 		bookNametoInfo.forEach((book,b)->hashmap.put(b.getBookTitle(),b.getAmountInInventory()));

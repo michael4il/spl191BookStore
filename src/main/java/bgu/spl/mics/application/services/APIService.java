@@ -15,14 +15,14 @@ import java.util.List;
  * It informs the store about desired purchases using {@link BookOrderEvent}.
  * This class may not hold references for objects which it is not responsible for:
  * {@link ResourcesHolder}, {@link MoneyRegister}, {@link Inventory}.
- * 
+ *
  * You can add private fields and public methods to this class.
  * You MAY change constructor signatures and even add new public constructors.
  */
 public class APIService extends MicroService{
 
-	Customer me;
-	int currectTick;
+	private Customer me;
+	private int currectTick;
 
 	List<Future<OrderReceipt>> futureList= new LinkedList<>();
 	public APIService(Customer customer) {
@@ -33,38 +33,40 @@ public class APIService extends MicroService{
 
 	@Override
 	protected  void initialize() {
-
-
 		subscribeBroadcast(Tick.class, message->{
 			currectTick=message.getTickNumber();
 			System.out.println(getName() +"  time : "+currectTick);
-			while(!me.getOrderlist().isEmpty() && me.getOrderlist().get(0).getValue()==currectTick)
-			{
-				OrderReceipt receipt=new OrderReceipt(me.getOrderlist().get(0).getValue(),me.getOrderlist().get(0).getKey(),me.getId());//
-				Future<OrderReceipt>future = sendEvent(new BookOrderEvent(me,receipt));
-				me.getOrderlist().remove(0);
-				futureList.add(future);
-			}
+			if(message.getLast()) {
+				terminate();
+			}else{
+				while(!me.getOrderlist().isEmpty() && me.getOrderlist().get(0).getValue()==currectTick)
+				{
+					OrderReceipt receipt=new OrderReceipt(me.getOrderlist().get(0).getValue(),me.getOrderlist().get(0).getKey(),me.getId());//
+					Future<OrderReceipt>future = sendEvent(new BookOrderEvent(me,receipt));
+					me.getOrderlist().remove(0);
+					futureList.add(future);
+				}
 
-			while(!futureList.isEmpty()){
-			Future<OrderReceipt> receiptFuture = futureList.get(0);
-			OrderReceipt orderReceipt = receiptFuture.get();
+				while(!futureList.isEmpty()){
+					Future<OrderReceipt> receiptFuture = futureList.get(0);
+					OrderReceipt orderReceipt = receiptFuture.get();
 
-			if(orderReceipt != null) {
-				System.out.println(orderReceipt);
-				me.getCustomerReceiptList().add(orderReceipt);
-				System.out.println("Customer has  "+me.getAvailableCreditAmount());
-			}
-			futureList.remove(0);
-			}
+					if(orderReceipt != null) {
+						System.out.println(orderReceipt);
+						me.getCustomerReceiptList().add(orderReceipt);
+						System.out.println("Customer has  "+me.getAvailableCreditAmount());
+					}
+					futureList.remove(0);
+				}
 //			*****************************************************DELIVERY  EVENT********************************************
-			// make a list of futures?
+				// make a list of futures?
 
 //					if(future.isDone()) {
 //						OrderReceipt receipt = future.get();
 //						if(receipt!=null) {
 //							sendEvent(new DeliveryEvent(customer));
 
+			}
 		});
 
 

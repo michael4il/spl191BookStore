@@ -66,10 +66,12 @@ public class MessageBusImpl implements MessageBus {
 			}
 		}
 		broadcastToQueue.get(b.getClass()).forEach(microService -> {
-			synchronized (serviceToQueue.get(microService)) {
-				serviceToQueue.get(microService).add(b);
-				serviceToQueue.get(microService).notify();
-			}
+			try {
+				synchronized (serviceToQueue.get(microService)) {
+					serviceToQueue.get(microService).add(b);
+					serviceToQueue.get(microService).notify();
+				}
+			}catch (NullPointerException ex){}
 		});
 		if(b.getClass() == Tick.class){
 			Tick tick = (Tick) b;
@@ -93,11 +95,14 @@ public class MessageBusImpl implements MessageBus {
 			eventToQueue.get(e.getClass()).add(m = eventToQueue.get(e.getClass()).poll());
 		}
 		Future<T> futureObj = new Future<>();
+
 		eventToFuture.put(e, futureObj);
-		synchronized (serviceToQueue.get(m)) {
-			serviceToQueue.get(m).add(e);
-			serviceToQueue.get(m).notifyAll();
-		}
+		try {
+			synchronized (serviceToQueue.get(m)) {
+				serviceToQueue.get(m).add(e);
+				serviceToQueue.get(m).notifyAll();
+			}
+		}catch (NullPointerException ex1){return null;}
 
 		System.out.println("EVENT SENT ="+ e.getClass().getSimpleName());
 		return futureObj;
@@ -118,28 +123,35 @@ public class MessageBusImpl implements MessageBus {
 		if(tempQ == null){
 			return;
 		}
-		eventToQueue.forEach((ev,qu) -> qu.forEach(ms-> {
-			if(ms == m){
-				qu.remove(m);
+		eventToQueue.forEach((ev,qu) -> {
+			synchronized (ev.getName()){
+				qu.forEach(ms -> {
+					if (ms == m) {
+						qu.remove(m);
+					}
+				});
 			}
-		}));
+		});
 		broadcastToQueue.forEach((ev,qu) -> qu.forEach(ms-> {
 			if(ms == m){
 				qu.remove(m);
 			}
 		}));
-		//Should be sync on serviceToQueue.get(m)? does not make sense because how we will free the key of something that is not exist?
+		//Should be sync on serviceToQueue.get(m)? probably not.
+		serviceToQueue.get(m).forEach(ev -> eventToFuture.get(ev).resolve(null));
 		serviceToQueue.remove(m);
 	}
 
 	@Override
 	public Message awaitMessage(MicroService m) throws InterruptedException {
-		synchronized (serviceToQueue.get(m)) {
-			while (serviceToQueue.get(m).isEmpty()) {
-				serviceToQueue.get(m).wait();
+		try {
+			synchronized (serviceToQueue.get(m)) {
+				while (serviceToQueue.get(m).isEmpty()) {
+					serviceToQueue.get(m).wait();
+				}
+				return serviceToQueue.get(m).poll();
 			}
-			return serviceToQueue.get(m).poll();
-		}
+		}catch (NullPointerException ex1){return null;}
 	}
 
 }

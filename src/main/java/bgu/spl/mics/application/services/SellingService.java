@@ -1,15 +1,9 @@
 package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.Future;
-import bgu.spl.mics.Messages.Broadcasts.AcquireBookEvent;
-import bgu.spl.mics.Messages.Broadcasts.BookOrderEvent;
-import bgu.spl.mics.Messages.Broadcasts.CheckAvailabiltyAndGetPriceEvent;
-import bgu.spl.mics.Messages.Broadcasts.Tick;
+import bgu.spl.mics.Messages.Broadcasts.*;
 import bgu.spl.mics.MicroService;
-import bgu.spl.mics.application.passiveObjects.Customer;
-import bgu.spl.mics.application.passiveObjects.MoneyRegister;
-import bgu.spl.mics.application.passiveObjects.OrderReceipt;
-import bgu.spl.mics.application.passiveObjects.OrderResult;
+import bgu.spl.mics.application.passiveObjects.*;
 
 /**
  * Selling service in charge of taking orders from customers.
@@ -37,6 +31,9 @@ public class SellingService extends MicroService{
 		subscribeBroadcast(Tick.class, message->{
 			currectTick=message.getTickNumber();
 			System.out.println(getName() +"  time : "+currectTick);
+			if(message.getLast()) {
+				terminate();
+			}
 	});
 
 
@@ -70,15 +67,17 @@ public class SellingService extends MicroService{
 						orderDetails.setPrice(price);
 
 						MoneyRegister.getInstance().file(orderDetails);//we need to make new receipt?
-
 						complete(message,orderDetails);
+						System.out.println("Sending Delivery Event to customer: " +customer.getName());
+						sendEvent(new DeliveryEvent(customer));
+
 					}
 					else{
 						System.out.println("Book Denied error *2fast4u*");
 						complete(message,null);}
 				}
 			}
-			complete(message,null);//check availability
+			complete(message,null);//falls in check availability
 
 		});
 

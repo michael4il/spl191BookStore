@@ -12,7 +12,7 @@ import java.util.Timer;
  * all other micro-services about the current time tick using {@link Tick Broadcast}.
  * This class may not hold references for objects which it is not responsible for:
  * {@link ResourcesHolder}, {@link MoneyRegister}, {@link Inventory}.
- * 
+ *
  * You can add private fields and public methods to this class.
  * You MAY change constructor signatures and even add new public constructors.
  */
@@ -22,19 +22,18 @@ public class TimeService extends MicroService{
 	private int delayinMiliSec;
 	private int duration;
 	private int currentTick = 0;
-	private boolean termi = false;
 	private Broadcast tickBroadcast = new Tick(0, false);
 	private TimerTask task = new TimerTask() {
 		@Override
 		public void run() {
 			tickBroadcast = new Tick(currentTick , currentTick >=  duration -1 );
-			System.out.println("\n ----------------------tick "+currentTick+"  ------------------------");
-			currentTick++;
-			if (currentTick >= duration) {
-				terminate();
-			} else {
-				sendBroadcast(tickBroadcast);
+
+			System.out.println("\n ----------------------tick "+(currentTick)+"  ------------------------");
+			sendBroadcast(tickBroadcast);
+			if(currentTick >= duration -1) {
+				timer.cancel();
 			}
+			currentTick++;
 		}
 	};
 
@@ -50,6 +49,7 @@ public class TimeService extends MicroService{
 	@Override
 	protected synchronized void initialize() {
 		try{wait(1000);}catch (InterruptedException e){}
+		terminate();
 		timer.scheduleAtFixedRate(task,0,delayinMiliSec);
 	}
 

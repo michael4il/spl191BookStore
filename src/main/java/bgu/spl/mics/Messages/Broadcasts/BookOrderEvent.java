@@ -5,8 +5,13 @@ import bgu.spl.mics.application.passiveObjects.Customer;
 import bgu.spl.mics.application.passiveObjects.OrderReceipt;
 
 public class BookOrderEvent implements Event {
-   private Customer customer;
+    private Customer customer;
     private OrderReceipt orderReceipt;
+
+    /**
+     * lastTick means that in the last tick we will use different get
+     *
+     */
     //we own customer for locking
     //receipt has now book and order tick ,need to updated and return in the future
 

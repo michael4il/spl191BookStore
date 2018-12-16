@@ -33,6 +33,9 @@ public class DeliveryVehicle {
 	 * @param distance	The distance from the store to the customer.
 	 */
 	public void deliver(String address, int distance) {
-
+		try {
+			System.out.println("Deliver with: " + this.license);
+			wait((distance/speed));
+		}catch (InterruptedException e){}
 	}
 }

@@ -18,19 +18,22 @@ import bgu.spl.mics.application.passiveObjects.OrderResult;
  */
 
 public class InventoryService extends MicroService{
-	Inventory Inv = Inventory.getInstance();
-	int currectTick;
+	private Inventory Inv = Inventory.getInstance();
+	private int currectTick;
 
 	public InventoryService(int i) {
 		super("InventoryService "+i);
 	}
-
+	@SuppressWarnings("Duplicates")
 	@Override
 	protected void initialize() {
 		//************************************************TIME******************************
 		subscribeBroadcast(Tick.class, message->{
 			currectTick=message.getTickNumber();
 			System.out.println(getName() +"  time : "+currectTick);
+			if(message.getLast()) {
+				terminate();
+			}
 		});
 		//***********************************************Subscribe CheckAvailability**************************
 		subscribeEvent(CheckAvailabiltyAndGetPriceEvent.class, (message)->{
