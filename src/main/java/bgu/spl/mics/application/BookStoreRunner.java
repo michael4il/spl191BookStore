@@ -11,7 +11,10 @@ import bgu.spl.mics.application.services.InventoryService;
 import bgu.spl.mics.application.services.SellingService;
 import bgu.spl.mics.application.services.TimeService;
 import com.google.gson.*;
-import javafx.util.Pair;
+import bgu.spl.mics.application.passiveObjects.*;
+
+
+
 import bgu.spl.mics.application.passiveObjects.Customer;
 
 
@@ -107,7 +110,7 @@ public class BookStoreRunner {//testing
            //when we start ,need to fix sending event in first tick block tick event
          //when we end, need to fix deadlock
 //----------------------------------------------------------------------------PARSING------------------------------------------------------------------
-        Inventory.getInstance().printInventoryToFile(args[2]);
+       // Inventory.getInstance().printInventoryToFile(args[2]);
         //need to parse recepits,customers,moneyregister
 
     }

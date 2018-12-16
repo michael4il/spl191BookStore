@@ -21,6 +21,7 @@ public class Inventory {
 	private static class SingletonHolder{
 		private static Inventory instance = new Inventory();
 	}
+
 	/**
      * Retrieves the single instance of this class.
      */

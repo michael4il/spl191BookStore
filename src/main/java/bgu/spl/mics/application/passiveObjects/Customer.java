@@ -1,10 +1,11 @@
 package bgu.spl.mics.application.passiveObjects;
 
-import javafx.util.Pair;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+
+
 
 /**
  * Passive data-object representing a customer of the store.

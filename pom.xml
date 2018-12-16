@@ -23,6 +23,9 @@
             <artifactId>gson</artifactId>
             <version>2.8.5</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.zenjava/javafx-maven-plugin -->
+
+
 
     </dependencies>
 </project>

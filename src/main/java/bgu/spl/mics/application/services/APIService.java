@@ -6,7 +6,6 @@ import bgu.spl.mics.Messages.Broadcasts.Tick;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.passiveObjects.Customer;
 import bgu.spl.mics.application.passiveObjects.OrderReceipt;
-import com.sun.org.apache.xpath.internal.operations.Or;
 
 import java.util.LinkedList;
 import java.util.List;
