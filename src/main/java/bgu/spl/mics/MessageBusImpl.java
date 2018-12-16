@@ -1,5 +1,7 @@
 package bgu.spl.mics;
 
+import bgu.spl.mics.Messages.Broadcasts.Tick;
+
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.BiConsumer;
@@ -69,7 +71,16 @@ public class MessageBusImpl implements MessageBus {
 				serviceToQueue.get(microService).notify();
 			}
 		});
-
+		if(b.getClass() == Tick.class){
+			Tick tick = (Tick) b;
+			if(tick.getLast()){
+				eventToFuture.forEach((K, V) -> {
+					synchronized (V) {
+						V.notifyAll();
+					}
+				});
+			}
+		}
 	}
 
 	@Override

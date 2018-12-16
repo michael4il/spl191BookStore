@@ -4,9 +4,14 @@ import bgu.spl.mics.Broadcast;
 
 public class Tick implements Broadcast {
     private int tickNumber;
-
-    public Tick(int tickNumber){
+    private boolean last;
+    public Tick(int tickNumber, boolean last){
         this.tickNumber = tickNumber;
+        this.last = last;
+    }
+
+    public boolean getLast(){
+        return last;
     }
 
     public int getTickNumber() {

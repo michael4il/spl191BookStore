@@ -22,11 +22,12 @@ public class TimeService extends MicroService{
 	private int delayinMiliSec;
 	private int duration;
 	private int currentTick = 0;
-	private Broadcast tickBroadcast = new Tick(0);
+	private boolean termi = false;
+	private Broadcast tickBroadcast = new Tick(0, false);
 	private TimerTask task = new TimerTask() {
 		@Override
 		public void run() {
-			tickBroadcast = new Tick(currentTick);
+			tickBroadcast = new Tick(currentTick , currentTick >=  duration -1 );
 			System.out.println("\n ----------------------tick "+currentTick+"  ------------------------");
 			currentTick++;
 			if (currentTick >= duration) {
@@ -49,7 +50,6 @@ public class TimeService extends MicroService{
 	@Override
 	protected synchronized void initialize() {
 		try{wait(1000);}catch (InterruptedException e){}
-		//timer.schedule(task, delayinMiliSec);
 		timer.scheduleAtFixedRate(task,0,delayinMiliSec);
 	}
 

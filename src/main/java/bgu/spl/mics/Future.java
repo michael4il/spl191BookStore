@@ -20,6 +20,7 @@ public class Future<T> {
 	 */
 	public Future() {
 		isDone.set(false);
+		result = null;
 	}
 
 	/**

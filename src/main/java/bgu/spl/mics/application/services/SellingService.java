@@ -49,8 +49,8 @@ public class SellingService extends MicroService{
 			orderDetails.setProcessTick(currectTick);//order update
 
 
-			Future<Integer> bookPriceFuture= sendEvent(new CheckAvailabiltyAndGetPriceEvent(orderDetails));
-			int price=bookPriceFuture.get();//here comes the waiting
+			Future<Integer> bookPriceFuture = sendEvent(new CheckAvailabiltyAndGetPriceEvent(orderDetails));
+			int price = bookPriceFuture.get();//here comes the waiting
 			if(price != -1 && customer.getAvailableCreditAmount()>=price)
 			{
 

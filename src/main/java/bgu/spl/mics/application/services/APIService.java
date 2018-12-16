@@ -47,10 +47,10 @@ public class APIService extends MicroService{
 			}
 
 			while(!futureList.isEmpty()){
-			Future<OrderReceipt> receiptFuture= futureList.get(0);
-			OrderReceipt orderReceipt=receiptFuture.get();
+			Future<OrderReceipt> receiptFuture = futureList.get(0);
+			OrderReceipt orderReceipt = receiptFuture.get();
 
-			if(orderReceipt!=null) {
+			if(orderReceipt != null) {
 				System.out.println(orderReceipt);
 				me.getCustomerReceiptList().add(orderReceipt);
 				System.out.println("Customer has  "+me.getAvailableCreditAmount());
