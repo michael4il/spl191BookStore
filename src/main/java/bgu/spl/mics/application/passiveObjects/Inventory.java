@@ -3,6 +3,7 @@ package bgu.spl.mics.application.passiveObjects;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -16,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * <p>
  * You can add ONLY private fields and methods to this class as you see fit.
  */
-public class Inventory {
+public class Inventory implements Serializable {
 	private ConcurrentHashMap<String, BookInventoryInfo> bookNametoInfo = new ConcurrentHashMap<>();
 	private static class SingletonHolder{
 		private static Inventory instance = new Inventory();
@@ -58,7 +59,7 @@ public class Inventory {
 		BookInventoryInfo bookInfo = bookNametoInfo.get(book);
 		synchronized (bookInfo)//Deadlock potential
 		{
-			if(bookInfo.getAmountInInventory()>1){
+			if(bookInfo.getAmountInInventory()>=1){
 				bookInfo.setCurrentAmount(bookInfo.getAmountInInventory()-1);
 				return OrderResult.SUCCESSFULLY_TAKEN;
 			}
@@ -95,9 +96,9 @@ public class Inventory {
 	 * should be the titles of the books while the values (type {@link Integer}) should be
 	 * their respective available amount in the inventory.
 	 * This method is called by the main method in order to generate the output.
-	 */
+	 */@SuppressWarnings("Duplicates")
 	public void printInventoryToFile(String filename){//make new map for output
-		HashMap<String, Integer> hashmap = new HashMap();
+		HashMap<String, Integer> hashmap = new HashMap<>();
 		bookNametoInfo.forEach((book,b)->hashmap.put(b.getBookTitle(),b.getAmountInInventory()));
 		try
 		{

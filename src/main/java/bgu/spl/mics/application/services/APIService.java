@@ -9,6 +9,7 @@ import bgu.spl.mics.application.passiveObjects.OrderReceipt;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * APIService is in charge of the connection between a client and the store.
@@ -22,13 +23,15 @@ import java.util.List;
 public class APIService extends MicroService{
 
 	private Customer me;
-	private int currectTick;
+	private int currectTick = 1;
+    private CountDownLatch countDownLatch;
+
 
 	List<Future<OrderReceipt>> futureList= new LinkedList<>();
-	public APIService(Customer customer) {
+	public APIService(Customer customer, CountDownLatch countDownLatch) {
 		super("WebAPI of  "+customer.getName());
 		this.me=customer;
-
+		this.countDownLatch = countDownLatch;
 	}
 
 	@Override
@@ -68,7 +71,6 @@ public class APIService extends MicroService{
 
 			}
 		});
-
-
+		countDownLatch.countDown();
 	}
 }

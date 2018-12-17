@@ -5,6 +5,7 @@ import bgu.spl.mics.Messages.Broadcasts.Tick;
 import bgu.spl.mics.MicroService;
 import java.util.TimerTask;
 import java.util.Timer;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * TimeService is the global system timer There is only one instance of this micro-service.
@@ -19,28 +20,33 @@ import java.util.Timer;
 
 public class TimeService extends MicroService{
 	private Timer timer = new Timer();
+	private CountDownLatch countDownLatch;
+
 	private int delayinMiliSec;
 	private int duration;
-	private int currentTick = 0;
+	private final int offset = 1;
+	private int currentTick = offset;
 	private Broadcast tickBroadcast = new Tick(0, false);
 	private TimerTask task = new TimerTask() {
 		@Override
 		public void run() {
-			tickBroadcast = new Tick(currentTick , currentTick >=  duration -1 );
+			tickBroadcast = new Tick(currentTick , currentTick >=  duration -1 +offset );
 
 			System.out.println("\n ----------------------tick "+(currentTick)+"  ------------------------");
 			sendBroadcast(tickBroadcast);
-			if(currentTick >= duration -1) {
+			if(currentTick >= duration -1 +offset) {
 				timer.cancel();
 			}
 			currentTick++;
 		}
 	};
 
-	public  TimeService(int speed,int duration) {
+	public  TimeService(int speed,int duration, CountDownLatch countDownLatch) {
 		super("Timer Service");
 		delayinMiliSec = speed;
 		this.duration = duration;
+		this.countDownLatch = countDownLatch;
+
 
 
 	}
@@ -48,7 +54,7 @@ public class TimeService extends MicroService{
 	//The init should be after all other services are registered.
 	@Override
 	protected synchronized void initialize() {
-		try{wait(1000);}catch (InterruptedException e){}
+		countDownLatch.countDown();
 		terminate();
 		timer.scheduleAtFixedRate(task,0,delayinMiliSec);
 	}

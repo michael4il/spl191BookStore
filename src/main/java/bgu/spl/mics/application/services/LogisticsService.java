@@ -8,6 +8,8 @@ import bgu.spl.mics.Messages.Broadcasts.Tick;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.passiveObjects.DeliveryVehicle;
 
+import java.util.concurrent.CountDownLatch;
+
 /**
  * Logistic service in charge of delivering books that have been purchased to customers.
  * Handles {@link DeliveryEvent}.
@@ -18,10 +20,13 @@ import bgu.spl.mics.application.passiveObjects.DeliveryVehicle;
  * You MAY change constructor signatures and even add new public constructors.
  */
 public class LogisticsService extends MicroService {
+	private CountDownLatch countDownLatch;
 
 	private int currectTick = 0;
-	public LogisticsService(int i) {
+	public LogisticsService(int i, CountDownLatch countDownLatch) {
 		super("LogisticsService " + i);
+		this.countDownLatch = countDownLatch;
+
 	}
 
 	@SuppressWarnings("Duplicates")
@@ -45,6 +50,8 @@ public class LogisticsService extends MicroService {
 			//Can be nullpointer because the last Tick make it null, and the sleep may throw interrupted exception.
 			catch (Exception e){}
 		});
+		countDownLatch.countDown();
+
 	}
 
 }

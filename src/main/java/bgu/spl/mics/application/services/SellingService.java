@@ -5,6 +5,8 @@ import bgu.spl.mics.Messages.Broadcasts.*;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.passiveObjects.*;
 
+import java.util.concurrent.CountDownLatch;
+
 /**
  * Selling service in charge of taking orders from customers.
  * Holds a reference to the {@link MoneyRegister} singleton of the store.
@@ -17,11 +19,15 @@ import bgu.spl.mics.application.passiveObjects.*;
  */
 public class SellingService extends MicroService{
 	private MoneyRegister moneyRegister;
+	private CountDownLatch countDownLatch;
+
 	private int currectTick;
-	public SellingService(int num) {
+	public SellingService(int num, CountDownLatch countDownLatch) {
 		super("SellingService"+num);
 		moneyRegister=MoneyRegister.getInstance();
 		currectTick=0;
+		this.countDownLatch = countDownLatch;
+
 
 	}
 
@@ -80,5 +86,7 @@ public class SellingService extends MicroService{
 			complete(message,null);//falls in check availability
 
 		});
+		countDownLatch.countDown();
 
-}}
+	}
+}

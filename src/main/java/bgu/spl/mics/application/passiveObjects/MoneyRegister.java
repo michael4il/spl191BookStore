@@ -1,8 +1,13 @@
 package bgu.spl.mics.application.passiveObjects;
 
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 /**
  * Passive object representing the store finance management. 
@@ -13,8 +18,8 @@ import java.util.List;
  * <p>
  * You can add ONLY private fields and methods to this class as you see fit.
  */
-public class MoneyRegister {
-	List<OrderReceipt> orderReceiptList=new LinkedList<>();
+public class MoneyRegister implements Serializable {
+	ConcurrentLinkedDeque<OrderReceipt> orderReceiptList=new ConcurrentLinkedDeque<>();
 
 	private  static class SingletonHolder{
 		private static MoneyRegister instance = new MoneyRegister();
@@ -41,8 +46,10 @@ public class MoneyRegister {
      * Retrieves the current total earnings of the store.  
      */
 	public int getTotalEarnings() {
-		//TODO: Implement this
-		return 0;
+		int sum=0;
+		for(OrderReceipt orderReceipt : orderReceiptList)
+			sum=sum+orderReceipt.getPrice();
+		return sum;
 	}
 	
 	/**
@@ -58,8 +65,22 @@ public class MoneyRegister {
      * Prints to a file named @filename a serialized object List<OrderReceipt> which holds all the order receipts 
      * currently in the MoneyRegister
      * This method is called by the main method in order to generate the output.
-     */
+     */@SuppressWarnings("Duplicates")
 	public void printOrderReceipts(String filename) {
-		//TODO: Implement this
+		List<OrderReceipt> list = new LinkedList<>();
+		for(OrderReceipt orderReceipt: orderReceiptList)
+			list.add(orderReceipt);
+		try
+		{
+			FileOutputStream fileStream = new FileOutputStream(filename);
+			ObjectOutputStream objectStream = new ObjectOutputStream(fileStream);
+			objectStream.writeObject(list);
+			objectStream.close();
+			fileStream.close();
+
+		}catch(IOException ioe) {
+			ioe.printStackTrace();
+		}
 	}
+
 }

@@ -2,8 +2,9 @@ package bgu.spl.mics.application.passiveObjects;
 
 import bgu.spl.mics.Future;
 
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  * Passive object representing the resource manager.
@@ -15,8 +16,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * You can add ONLY private methods and fields to this class.
  */
 public class ResourcesHolder {
-	private ConcurrentLinkedQueue<DeliveryVehicle> freeVehicle = new ConcurrentLinkedQueue<>();
-	private ConcurrentLinkedQueue<Future<DeliveryVehicle>> waitingFutures = new ConcurrentLinkedQueue<>();
+	private BlockingDeque<DeliveryVehicle> freeVehicle = new LinkedBlockingDeque<>();
 	private boolean didTerminate = false;
 	private static class SingletonHolder{
 		private static ResourcesHolder instance = new ResourcesHolder();
@@ -36,18 +36,13 @@ public class ResourcesHolder {
 	 * @return 	{@link Future<DeliveryVehicle>} object which will resolve to a
 	 * 			{@link DeliveryVehicle} when completed.
 	 */
-	public synchronized Future<DeliveryVehicle> acquireVehicle() {
+	public Future<DeliveryVehicle> acquireVehicle() {
 		Future<DeliveryVehicle> deliveryVehicleFuture = new Future<>();
 		if(didTerminate){
 			deliveryVehicleFuture.resolve(null);
 			return deliveryVehicleFuture;
 		}
-		if(!freeVehicle.isEmpty()){
-			deliveryVehicleFuture.resolve(freeVehicle.poll());
-		}
-		else{
-			waitingFutures.add(deliveryVehicleFuture);
-		}
+		deliveryVehicleFuture.resolve(freeVehicle.poll());
 		//TODO: I hope that we send reference and we can access the same future object in the queue and in the returned value.
 		return deliveryVehicleFuture;
 	}
@@ -58,18 +53,12 @@ public class ResourcesHolder {
 	 * <p>
 	 * @param vehicle	{@link DeliveryVehicle} to be released.
 	 */
-	public synchronized void releaseVehicle(DeliveryVehicle vehicle) {
+	public void releaseVehicle(DeliveryVehicle vehicle) {
 		if(vehicle.getSpeed() > 0) {//We get a real Vehicle
-			if (!waitingFutures.isEmpty()) {
-				waitingFutures.poll().resolve(vehicle);
-			} else {
-				freeVehicle.add(vehicle);
-			}
+			freeVehicle.add(vehicle);
 		}else {
 			didTerminate = true;
-			waitingFutures.forEach(fut -> {
-				fut.resolve(null);
-			});
+			freeVehicle.addFirst(vehicle);
 		}
 	}
 

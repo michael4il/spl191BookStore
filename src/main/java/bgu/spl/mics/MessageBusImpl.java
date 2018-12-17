@@ -88,12 +88,14 @@ public class MessageBusImpl implements MessageBus {
 	@Override
 	public <T> Future<T> sendEvent(Event<T> e) {
 		MicroService m;
-		synchronized (e.getClass().getName()) {
-			if(eventToQueue.get(e.getClass()) == null || eventToQueue.get(e.getClass()).isEmpty()){// or empty
-				return null;
+		try {
+			synchronized (e.getClass().getName()) {
+				if (eventToQueue.get(e.getClass()) == null || eventToQueue.get(e.getClass()).isEmpty()) {// or empty
+					return null;
+				}
+				eventToQueue.get(e.getClass()).add(m = eventToQueue.get(e.getClass()).poll());
 			}
-			eventToQueue.get(e.getClass()).add(m = eventToQueue.get(e.getClass()).poll());
-		}
+		}catch (NullPointerException ex2){return null;}
 		Future<T> futureObj = new Future<>();
 
 		eventToFuture.put(e, futureObj);
