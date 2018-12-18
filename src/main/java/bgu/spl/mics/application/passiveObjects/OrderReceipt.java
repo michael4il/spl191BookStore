@@ -48,4 +48,30 @@ public class OrderReceipt implements Serializable {
 		this.processTick = processTick;
 	}
 
+	public int getOrderId() { return orderID; }
+	public String getSeller() { return seller; }
+	public int getCustomerId() { return customerId; }
+	public int getIssuedTick() { return issueTick; }
+	public int getOrderTick() { return orderTick; }
+	public int getProcessTick() { return processTick; }
+
+	public int getIssueTick() {
+		return issueTick;
+	}
+
+	public void setOrderID(int orderID) {
+		this.orderID = orderID;
+	}
+
+	public void setCustomerId(int customerId) {
+		this.customerId = customerId;
+	}
+
+	public void setBookTitle(String bookTitle) {
+		this.bookTitle = bookTitle;
+	}
+	public void setOrderTick(int orderTick) {
+		this.orderTick = orderTick;
+	}
+
 }

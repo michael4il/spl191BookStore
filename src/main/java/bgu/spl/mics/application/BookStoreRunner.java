@@ -27,8 +27,7 @@ import java.util.concurrent.CountDownLatch;
  * In the end, you should output serialized objects.
  */
 @SuppressWarnings("Duplicates")
-public class BookStoreRunner {//testing
-    private CountDownLatch countDownLatch;
+public class BookStoreRunner {
 
     public static void main(String[] args) throws IOException {
         HashMap<Integer, Customer> customerHashMap = new HashMap<>();
@@ -151,9 +150,7 @@ public class BookStoreRunner {//testing
         }
         System.out.println();
 
-
 //----------------------------------------------------------------------------PARSING------------------------------------------------------------------
-
 
         Inventory.getInstance().printInventoryToFile(args[2]);
         MoneyRegister.getInstance().printOrderReceipts(args[3]);
