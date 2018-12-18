@@ -24,7 +24,7 @@ public class MoneyRegister implements Serializable {
 	private  static class SingletonHolder{
 		private static MoneyRegister instance = new MoneyRegister();
 	}
-	
+
 	/**
      * Retrieves the single instance of this class.
      */

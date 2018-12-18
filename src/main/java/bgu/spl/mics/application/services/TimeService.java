@@ -32,7 +32,7 @@ public class TimeService extends MicroService{
 		public void run() {
 			tickBroadcast = new Tick(currentTick , currentTick >=  duration -1 +offset );
 
-			System.out.println("\n ----------------------tick "+(currentTick)+"  ------------------------");
+			//System.out.println("\n ----------------------tick "+(currentTick)+"  ------------------------");
 			sendBroadcast(tickBroadcast);
 			if(currentTick >= duration -1 +offset) {
 				timer.cancel();

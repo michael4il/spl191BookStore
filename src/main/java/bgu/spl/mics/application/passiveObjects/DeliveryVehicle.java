@@ -13,10 +13,11 @@ public class DeliveryVehicle {
 		this.license=license;
 		this.speed=speed;
 	}
+
+	/**
+	 * Retrieves the license of this delivery vehicle.
+	 */
 	public int getLicense() { return license; }
-
-
-
 
 	/**
 	 * Retrieves the speed of this vehicle person.
@@ -34,7 +35,6 @@ public class DeliveryVehicle {
 	 */
 	public void deliver(String address, int distance) {
 		try {
-			System.out.println("Deliver with: " + this.license);
 			wait((distance/speed));
 		}catch (InterruptedException e){}
 	}

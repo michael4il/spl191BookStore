@@ -13,7 +13,7 @@ import java.util.concurrent.CountDownLatch;
  * Handles {@link BookOrderEvent}.
  * This class may not hold references for objects which it is not responsible for:
  * {@link ResourcesHolder}, {@link Inventory}.
- * 
+ *
  * You can add private fields and public methods to this class.
  * You MAY change constructor signatures and even add new public constructors.
  */
@@ -36,11 +36,10 @@ public class SellingService extends MicroService{
 //************************************************TIME******************************
 		subscribeBroadcast(Tick.class, message->{
 			currectTick=message.getTickNumber();
-			System.out.println(getName() +"  time : "+currectTick);
 			if(message.getLast()) {
 				terminate();
 			}
-	});
+		});
 
 
 
@@ -53,34 +52,35 @@ public class SellingService extends MicroService{
 
 
 			Future<Integer> bookPriceFuture = sendEvent(new CheckAvailabiltyAndGetPriceEvent(orderDetails));
-			int price = bookPriceFuture.get();//here comes the waiting
+			int price =-1;
+			try{
+				price = bookPriceFuture.get();//here comes the waiting
+			}catch (NullPointerException exc){complete(message,null);}
+
 			if(price != -1 && customer.getAvailableCreditAmount()>=price)
 			{
 
 				//locking happens here because of MoneyRegister.chargeCreditCard is here
 				synchronized (customer) {
-					Future<OrderResult> orderResultFuture = sendEvent(new AcquireBookEvent(orderDetails, customer));
+					if (customer.getAvailableCreditAmount() >= price) {
+						Future<OrderResult> orderResultFuture = sendEvent(new AcquireBookEvent(orderDetails, customer));
+						OrderResult orderResult = orderResultFuture.get();//waiting here,need to prevent deadlock in final tick and no logistics services available
+						if (orderResult == OrderResult.SUCCESSFULLY_TAKEN ) {
+							moneyRegister.chargeCreditCard(customer, price);
+							//some order updates
+							orderDetails.setSeller(this.getName());
+							orderDetails.setIssueTick(currectTick);
+							orderDetails.setPrice(price);
 
-					OrderResult orderResult = orderResultFuture.get();//waiting here,need to prevent deadlock in final tick and no logistics services available
+							MoneyRegister.getInstance().file(orderDetails);//we need to make new receipt?
+							complete(message, orderDetails);
+							sendEvent(new DeliveryEvent(customer));
 
-					if(orderResult==OrderResult.SUCCESSFULLY_TAKEN&&customer.getAvailableCreditAmount()>=price)
-					{
-						System.out.println("Book SUCCESSFULLY_TAKEN");
-						moneyRegister.chargeCreditCard(customer,price);
-						//some order updates
-						orderDetails.setSeller(this.getName());
-						orderDetails.setIssueTick(currectTick);
-						orderDetails.setPrice(price);
-
-						MoneyRegister.getInstance().file(orderDetails);//we need to make new receipt?
-						complete(message,orderDetails);
-						System.out.println("Sending Delivery Event to customer: " +customer.getName());
-						sendEvent(new DeliveryEvent(customer));
-
+						}
+					} else {
+						//Book Denied
+						complete(message, null);
 					}
-					else{
-						System.out.println("Book Denied error *2fast4u*");
-						complete(message,null);}
 				}
 			}
 			complete(message,null);//falls in check availability

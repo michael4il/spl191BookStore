@@ -33,7 +33,6 @@ public class ResourceService extends MicroService{
 	protected void initialize() {
 		subscribeBroadcast(Tick.class, message -> {
 			currectTick=message.getTickNumber();
-			System.out.println(getName() +"  time : "+currectTick);
 			if(message.getLast()) {
 				ResourcesHolder.getInstance().releaseVehicle(new DeliveryVehicle(0,-1));//An imaginary vehicle that marks that we should release all vehicles in ResourcesHolder
 				terminate();

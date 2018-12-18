@@ -12,7 +12,6 @@ public class BookOrderEvent implements Event {
      * lastTick means that in the last tick we will use different get
      *
      */
-    //we own customer for locking
     //receipt has now book and order tick ,need to updated and return in the future
 
 

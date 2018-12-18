@@ -34,7 +34,6 @@ public class InventoryService extends MicroService{
 		//************************************************TIME******************************
 		subscribeBroadcast(Tick.class, message->{
 			currectTick=message.getTickNumber();
-			System.out.println(getName() +"  time : "+currectTick);
 			if(message.getLast()) {
 				terminate();
 			}

@@ -38,7 +38,6 @@ public class APIService extends MicroService{
 	protected  void initialize() {
 		subscribeBroadcast(Tick.class, message->{
 			currectTick=message.getTickNumber();
-			System.out.println(getName() +"  time : "+currectTick);
 			if(message.getLast()) {
 				terminate();
 			}else{
@@ -52,23 +51,17 @@ public class APIService extends MicroService{
 
 				while(!futureList.isEmpty()){
 					Future<OrderReceipt> receiptFuture = futureList.get(0);
+					if(receiptFuture == null){
+						futureList.remove(0);
+						continue;
+					}
 					OrderReceipt orderReceipt = receiptFuture.get();
 
 					if(orderReceipt != null) {
-						System.out.println(orderReceipt);
 						me.getCustomerReceiptList().add(orderReceipt);
-						System.out.println("Customer has  "+me.getAvailableCreditAmount());
 					}
 					futureList.remove(0);
 				}
-//			*****************************************************DELIVERY  EVENT********************************************
-				// make a list of futures?
-
-//					if(future.isDone()) {
-//						OrderReceipt receipt = future.get();
-//						if(receipt!=null) {
-//							sendEvent(new DeliveryEvent(customer));
-
 			}
 		});
 		countDownLatch.countDown();

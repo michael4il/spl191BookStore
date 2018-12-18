@@ -43,7 +43,6 @@ public class Inventory implements Serializable {
 		{
 			bookNametoInfo.put(bookInfo.getBookTitle(),bookInfo);
 		}
-
 	}
 
 	/**
@@ -54,13 +53,14 @@ public class Inventory implements Serializable {
 	 * 			The first should not change the state of the inventory while the
 	 * 			second should reduce by one the number of books of the desired type.
 	 */
-	//Maybe sync on the book
+	//sync on the book
 	public OrderResult take (String book) {
-		BookInventoryInfo bookInfo = bookNametoInfo.get(book);
-		synchronized (bookInfo)//Deadlock potential
+		synchronized (book)
 		{
+			BookInventoryInfo bookInfo = bookNametoInfo.get(book);
 			if(bookInfo.getAmountInInventory()>=1){
 				bookInfo.setCurrentAmount(bookInfo.getAmountInInventory()-1);
+				//System.out.println(bookInfo.getBookTitle()+ " Current Amount: "+ bookInfo.getAmountInInventory());
 				return OrderResult.SUCCESSFULLY_TAKEN;
 			}
 			else
@@ -70,16 +70,14 @@ public class Inventory implements Serializable {
 		}
 	}
 
-
-
 	/**
 	 * Checks if a certain book is available in the inventory.
 	 * <p>
 	 * @param book 		Name of the book.
 	 * @return the price of the book if it is available, -1 otherwise.
 	 */
-	// sync if the output depends on the 'take' method.
-	//Probably YES!
+	//Do not have to be sync because it will check later if it is available when it will be sync on the book.
+	//This check is only for pre check and for the customer it is THE check if he/she has enough money.
 	public int checkAvailabiltyAndGetPrice(String book) {
 		if(bookNametoInfo.get(book)!=null)
 		{

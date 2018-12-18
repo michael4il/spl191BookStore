@@ -34,13 +34,11 @@ public class LogisticsService extends MicroService {
 	protected void initialize() {
 		subscribeBroadcast(Tick.class, message->{
 			currectTick=message.getTickNumber();
-			System.out.println(getName() +"  time : "+currectTick);
 			if(message.getLast()) {
 				terminate();
 			}
 		});
 		subscribeEvent(DeliveryEvent.class, message -> {
-			System.out.println("Received DeliveryEvent with: " + message.getCustomer().getName());
 			Future<DeliveryVehicle> futureVehicleThatWillDeliver = sendEvent(new AskForVehicle());
 			try {
 				DeliveryVehicle vehicleThatWillDeliver = futureVehicleThatWillDeliver.get();

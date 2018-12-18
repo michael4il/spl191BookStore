@@ -43,7 +43,6 @@ public class ResourcesHolder {
 			return deliveryVehicleFuture;
 		}
 		deliveryVehicleFuture.resolve(freeVehicle.poll());
-		//TODO: I hope that we send reference and we can access the same future object in the queue and in the returned value.
 		return deliveryVehicleFuture;
 	}
 

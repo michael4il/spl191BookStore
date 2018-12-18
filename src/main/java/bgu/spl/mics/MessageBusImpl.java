@@ -67,9 +67,9 @@ public class MessageBusImpl implements MessageBus {
 		}
 		broadcastToQueue.get(b.getClass()).forEach(microService -> {
 			try {
-				synchronized (serviceToQueue.get(microService)) {
+				synchronized (microService) {
 					serviceToQueue.get(microService).add(b);
-					serviceToQueue.get(microService).notify();
+					microService.notify();
 				}
 			}catch (NullPointerException ex){}
 		});
@@ -77,9 +77,7 @@ public class MessageBusImpl implements MessageBus {
 			Tick tick = (Tick) b;
 			if(tick.getLast()){
 				eventToFuture.forEach((K, V) -> {
-					synchronized (V) {
-						V.notifyAll();
-					}
+					V.resolve(null);
 				});
 			}
 		}
@@ -100,13 +98,11 @@ public class MessageBusImpl implements MessageBus {
 
 		eventToFuture.put(e, futureObj);
 		try {
-			synchronized (serviceToQueue.get(m)) {
+			synchronized (m) {
 				serviceToQueue.get(m).add(e);
-				serviceToQueue.get(m).notifyAll();
+				m.notifyAll();
 			}
 		}catch (NullPointerException ex1){return null;}
-
-		System.out.println("EVENT SENT ="+ e.getClass().getSimpleName());
 		return futureObj;
 	}
 
@@ -139,17 +135,19 @@ public class MessageBusImpl implements MessageBus {
 				qu.remove(m);
 			}
 		}));
-		//Should be sync on serviceToQueue.get(m)? probably not.
-		serviceToQueue.get(m).forEach(ev -> eventToFuture.get(ev).resolve(null));
-		serviceToQueue.remove(m);
+		//
+		synchronized (m) {
+			serviceToQueue.get(m).forEach(ev -> eventToFuture.get(ev).resolve(null));
+			serviceToQueue.remove(m);
+		}
 	}
 
 	@Override
 	public Message awaitMessage(MicroService m) throws InterruptedException {
 		try {
-			synchronized (serviceToQueue.get(m)) {
+			synchronized (m) {
 				while (serviceToQueue.get(m).isEmpty()) {
-					serviceToQueue.get(m).wait();
+					m.wait();
 				}
 				return serviceToQueue.get(m).poll();
 			}
