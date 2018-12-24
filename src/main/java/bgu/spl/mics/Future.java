@@ -31,7 +31,7 @@ public class Future<T> {
 	 * @return return the result of type T if it is available, if not wait until it is available.
 	 *
 	 */
-	public synchronized T get() {
+	public synchronized T get() { //sleeps of future monitor
 		while(!isDone.get()){
 			try {
 				wait();
@@ -43,7 +43,7 @@ public class Future<T> {
 	/**
 	 * Resolves the result of this Future object.
 	 */
-	public synchronized void resolve (T result) {
+	public synchronized void resolve (T result) {//wake up other sleeping thread
 		if (!isDone.get()) {
 			this.result = result;
 			isDone.set(true);

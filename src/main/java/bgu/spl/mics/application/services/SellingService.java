@@ -67,6 +67,7 @@ public class SellingService extends MicroService{
 						OrderResult orderResult = orderResultFuture.get();//waiting here,need to prevent deadlock in final tick and no logistics services available
 						if (orderResult == OrderResult.SUCCESSFULLY_TAKEN ) {
 							moneyRegister.chargeCreditCard(customer, price);
+
 							//some order updates
 							orderDetails.setSeller(this.getName());
 							orderDetails.setIssueTick(currectTick);

@@ -41,9 +41,9 @@ public class LogisticsService extends MicroService {
 		subscribeEvent(DeliveryEvent.class, message -> {
 			Future<DeliveryVehicle> futureVehicleThatWillDeliver = sendEvent(new AskForVehicle());
 			try {
-				DeliveryVehicle vehicleThatWillDeliver = futureVehicleThatWillDeliver.get();
-				vehicleThatWillDeliver.deliver(message.getCustomer().getAddress(),message.getCustomer().getDistance() );
-				sendEvent(new ReleaseVehicleEvent(vehicleThatWillDeliver));
+				DeliveryVehicle vehicleThatWillDeliver = futureVehicleThatWillDeliver.get();//waiting for car
+				vehicleThatWillDeliver.deliver(message.getCustomer().getAddress(),message.getCustomer().getDistance() ); //car goes vroom vroom
+				sendEvent(new ReleaseVehicleEvent(vehicleThatWillDeliver));// return vehicle
 			}
 			//Can be nullpointer because the last Tick make it null, and the sleep may throw interrupted exception.
 			catch (Exception e){}

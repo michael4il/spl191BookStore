@@ -60,20 +60,22 @@ public class MessageBusImpl implements MessageBus {
 	@Override
 	public void  sendBroadcast(Broadcast b) {
 
-		synchronized (b.getClass().getName()) {
+		synchronized (b.getClass().getName()) { // in case the there's no queue available
 			if (broadcastToQueue.get(b.getClass()) == null || broadcastToQueue.get(b.getClass()).isEmpty()) {
 				return;
 			}
 		}
 		broadcastToQueue.get(b.getClass()).forEach(microService -> {
 			try {
-				synchronized (microService) {
+				synchronized (microService) { // hold monitor to notify
 					serviceToQueue.get(microService).add(b);
 					microService.notify();
 				}
 			}catch (NullPointerException ex){}
 		});
-		if(b.getClass() == Tick.class){
+
+
+		if(b.getClass() == Tick.class){ // last tick resolve all events
 			Tick tick = (Tick) b;
 			if(tick.getLast()){
 				eventToFuture.forEach((K, V) -> {
@@ -87,18 +89,19 @@ public class MessageBusImpl implements MessageBus {
 	public <T> Future<T> sendEvent(Event<T> e) {
 		MicroService m;
 		try {
-			synchronized (e.getClass().getName()) {
-				if (eventToQueue.get(e.getClass()) == null || eventToQueue.get(e.getClass()).isEmpty()) {// or empty
+			synchronized (e.getClass().getName()) {//hold event type monitor
+				if (eventToQueue.get(e.getClass()) == null || eventToQueue.get(e.getClass()).isEmpty()) {// in case the there's no queue available
 					return null;
 				}
-				eventToQueue.get(e.getClass()).add(m = eventToQueue.get(e.getClass()).poll());
+				eventToQueue.get(e.getClass()).add(m = eventToQueue.get(e.getClass()).poll());//round robin first to last + save reference
 			}
 		}catch (NullPointerException ex2){return null;}
-		Future<T> futureObj = new Future<>();
 
+		Future<T> futureObj = new Future<>();
 		eventToFuture.put(e, futureObj);
+
 		try {
-			synchronized (m) {
+			synchronized (m) { //m is not necessarily last,2 round robin and then 2 events added
 				serviceToQueue.get(m).add(e);
 				m.notifyAll();
 			}
@@ -114,7 +117,7 @@ public class MessageBusImpl implements MessageBus {
 	}
 
 	@Override
-	//Should be sync?
+
 	public void unregister(MicroService m) {
 		ConcurrentLinkedQueue tempQ;
 		tempQ = serviceToQueue.get(m);
@@ -122,7 +125,7 @@ public class MessageBusImpl implements MessageBus {
 			return;
 		}
 		eventToQueue.forEach((ev,qu) -> {
-			synchronized (ev.getName()){
+			synchronized (ev.getName()){//event type monitor ,cant unregister queue from if someone is doing round-robin
 				qu.forEach(ms -> {
 					if (ms == m) {
 						qu.remove(m);
@@ -135,8 +138,8 @@ public class MessageBusImpl implements MessageBus {
 				qu.remove(m);
 			}
 		}));
-		//
-		synchronized (m) {
+		//???
+		synchronized (m) { // m monitor,resolve m queue
 			serviceToQueue.get(m).forEach(ev -> eventToFuture.get(ev).resolve(null));
 			serviceToQueue.remove(m);
 		}
@@ -145,7 +148,7 @@ public class MessageBusImpl implements MessageBus {
 	@Override
 	public Message awaitMessage(MicroService m) throws InterruptedException {
 		try {
-			synchronized (m) {
+			synchronized (m) {// m monitor,
 				while (serviceToQueue.get(m).isEmpty()) {
 					m.wait();
 				}

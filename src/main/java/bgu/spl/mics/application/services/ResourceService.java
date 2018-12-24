@@ -33,15 +33,19 @@ public class ResourceService extends MicroService{
 	protected void initialize() {
 		subscribeBroadcast(Tick.class, message -> {
 			currectTick=message.getTickNumber();
-			if(message.getLast()) {
-				ResourcesHolder.getInstance().releaseVehicle(new DeliveryVehicle(0,-1));//An imaginary vehicle that marks that we should release all vehicles in ResourcesHolder
+			if(message.getLast()) {   //An imaginary vehicle that marks that we should release all vehicles in ResourcesHolder
+
+				ResourcesHolder.getInstance().releaseVehicle(new DeliveryVehicle(0,-1));//adding new vehicle
 				terminate();
 			}
 		});
+
 		subscribeEvent(AskForVehicle.class, message -> {
 			DeliveryVehicle currentVehicle = ResourcesHolder.getInstance().acquireVehicle().get();
 			complete(message, currentVehicle );
 		});
+
+
 		subscribeEvent(ReleaseVehicleEvent.class, message -> {
 			ResourcesHolder.getInstance().releaseVehicle(message.getDeliveryVehicle());
 		});

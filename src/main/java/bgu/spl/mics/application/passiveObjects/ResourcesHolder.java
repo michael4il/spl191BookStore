@@ -42,7 +42,7 @@ public class ResourcesHolder {
 			deliveryVehicleFuture.resolve(null);
 			return deliveryVehicleFuture;
 		}
-		deliveryVehicleFuture.resolve(freeVehicle.poll());
+		deliveryVehicleFuture.resolve(freeVehicle.poll());//waiting ??
 		return deliveryVehicleFuture;
 	}
 
