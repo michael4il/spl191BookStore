@@ -31,6 +31,7 @@ public class Future<T> {
 	 * @return return the result of type T if it is available, if not wait until it is available.
 	 *
 	 */
+	//We need to wait. it is better that every Future will wait on himself, instead of making other keys.
 	public synchronized T get() { //sleeps of future monitor
 		while(!isDone.get()){
 			try {
@@ -43,7 +44,8 @@ public class Future<T> {
 	/**
 	 * Resolves the result of this Future object.
 	 */
-	public synchronized void resolve (T result) {//wake up other sleeping thread
+	//wake up other sleeping thread
+	public synchronized void resolve (T result) {
 		if (!isDone.get()) {
 			this.result = result;
 			isDone.set(true);
@@ -69,6 +71,7 @@ public class Future<T> {
 	 * 	       wait for {@code timeout} TimeUnits {@code unit}. If time has
 	 *         elapsed, return null.
 	 */
+	//Again we need to sleep the Future.
 	public synchronized T get(long timeout, TimeUnit unit) {
 		if(!isDone.get()){
 			try {
