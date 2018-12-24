@@ -33,6 +33,7 @@ public class MessageBusImpl implements MessageBus {
 	@SuppressWarnings("Duplicates")
 	@Override
 	public <T> void subscribeEvent(Class<? extends Event<T>> type, MicroService m) {
+		//Sync because me made a new queue when we get a new event/braodcast. we don't want that more than 1 will create the same key with different queues.
 		synchronized (type.getName()) {
 			if (eventToQueue.get(type) == null) {//if the type of this event is not already handle.
 				eventToQueue.put(type, new ConcurrentLinkedQueue<>());
@@ -44,6 +45,7 @@ public class MessageBusImpl implements MessageBus {
 	@SuppressWarnings("Duplicates")
 	@Override
 	public void subscribeBroadcast(Class<? extends Broadcast> type, MicroService m) {
+		//Sync because me made a new queue when we get a new event/braodcast. we don't want that more than 1 will create the same key with different queues.
 		synchronized (type.getName()) {
 			if (broadcastToQueue.get(type) == null) { //if the type of this Broadcast is not already handle.
 				broadcastToQueue.put(type, new ConcurrentLinkedQueue<>());
@@ -59,7 +61,7 @@ public class MessageBusImpl implements MessageBus {
 
 	@Override
 	public void  sendBroadcast(Broadcast b) {
-
+		//Same as sendEvent.
 		synchronized (b.getClass().getName()) { // in case the there's no queue available
 			if (broadcastToQueue.get(b.getClass()) == null || broadcastToQueue.get(b.getClass()).isEmpty()) {
 				return;
@@ -89,6 +91,10 @@ public class MessageBusImpl implements MessageBus {
 	public <T> Future<T> sendEvent(Event<T> e) {
 		MicroService m;
 		try {
+			//Sync for the Round robin - we don't want that one thread will poll and than other thread also,
+			//and than the second will add before the first.
+			//Sync on "if" - maybe in some programs subscribe to event has to be before sendEvent, and therefore without the sync
+			//and important - this is the same sync for subscribe event, it could yeild that the program is not correct.
 			synchronized (e.getClass().getName()) {//hold event type monitor
 				if (eventToQueue.get(e.getClass()) == null || eventToQueue.get(e.getClass()).isEmpty()) {// in case the there's no queue available
 					return null;
@@ -101,7 +107,8 @@ public class MessageBusImpl implements MessageBus {
 		eventToFuture.put(e, futureObj);
 
 		try {
-			synchronized (m) { //m is not necessarily last,2 round robin and then 2 events added
+			//We sync because we want to notify to the thread of the MicroService that an event came.
+			synchronized (m) {
 				serviceToQueue.get(m).add(e);
 				m.notifyAll();
 			}
@@ -110,7 +117,6 @@ public class MessageBusImpl implements MessageBus {
 	}
 
 	@Override
-	//Should be sync?
 	public void register(MicroService m) {
 		ConcurrentLinkedQueue concQ = new ConcurrentLinkedQueue();
 		serviceToQueue.put(m ,concQ);
@@ -125,7 +131,8 @@ public class MessageBusImpl implements MessageBus {
 			return;
 		}
 		eventToQueue.forEach((ev,qu) -> {
-			synchronized (ev.getName()){//event type monitor ,cant unregister queue from if someone is doing round-robin
+			//cant delelte the MicroService from the queue if someone is doing round-robin
+			synchronized (ev.getName()){
 				qu.forEach(ms -> {
 					if (ms == m) {
 						qu.remove(m);
@@ -138,8 +145,9 @@ public class MessageBusImpl implements MessageBus {
 				qu.remove(m);
 			}
 		}));
-		//???
-		synchronized (m) { // m monitor,resolve m queue
+		//Sync because without the situation of the queue being remove while other thread (the MicroService thread) poll a message from this queue
+		//is optional.
+		synchronized (m) {
 			serviceToQueue.get(m).forEach(ev -> eventToFuture.get(ev).resolve(null));
 			serviceToQueue.remove(m);
 		}
@@ -148,7 +156,8 @@ public class MessageBusImpl implements MessageBus {
 	@Override
 	public Message awaitMessage(MicroService m) throws InterruptedException {
 		try {
-			synchronized (m) {// m monitor,
+			//We need to be notify somehow, so we wait on m.
+			synchronized (m) {
 				while (serviceToQueue.get(m).isEmpty()) {
 					m.wait();
 				}
